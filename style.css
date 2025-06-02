@@ -9,9 +9,15 @@ canvas {
   background: #222;
   display: block;
   margin: 0 auto;
+  width: 90vmin;
+  height: 90vmin;
 }
 
 button {
+  margin-top: 10px;
+}
+
+#player-name {
   margin-top: 10px;
 }
 
@@ -78,4 +84,11 @@ body.neon {
 }
 body.neon canvas {
   background: #000;
+}
+
+@media (max-width: 700px) {
+  canvas {
+    width: 95vmin;
+    height: 95vmin;
+  }
 }
