@@ -95,9 +95,12 @@ function gameLoop(timestamp) {
 
 let lastTime = 0;
 const frameDelay = 150; // ms
+const fastFrameDelay = 75; // ms when holding spacebar
+let fastMode = false;
 
 function step(timestamp) {
-  if (timestamp - lastTime < frameDelay) return true;
+  const delay = fastMode ? fastFrameDelay : frameDelay;
+  if (timestamp - lastTime < delay) return true;
   lastTime = timestamp;
 
   const head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
@@ -172,6 +175,15 @@ window.addEventListener('keydown', e => {
       if (velocity.x === -1) break;
       velocity = { x: 1, y: 0 };
       break;
+    case ' ': // spacebar
+      fastMode = true;
+      break;
+  }
+});
+
+window.addEventListener('keyup', e => {
+  if (e.key === ' ') {
+    fastMode = false;
   }
 });
 
