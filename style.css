@@ -5,6 +5,15 @@ body {
   position: relative;
 }
 
+#layout {
+  display: block;
+}
+
+#game-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 canvas {
   background: #222;
   display: block;
@@ -85,6 +94,26 @@ h1 {
 }
 #options select {
   margin: 0 5px;
+}
+
+#sidebar {
+  max-width: 250px;
+  margin: 0 auto;
+}
+
+@media (min-width: 800px) {
+  #layout {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  #sidebar {
+    text-align: left;
+    margin-left: 20px;
+  }
+  #leaderboard {
+    margin-left: 0;
+  }
 }
 
 body.dark {

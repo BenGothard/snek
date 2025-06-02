@@ -8,33 +8,39 @@
 </head>
 <body>
   <h1>Snek</h1>
-  <canvas id="game" width="600" height="600"></canvas>
-  <div id="game-over" style="display:none">Game Over</div>
-  <div id="paused" style="display:none">Paused</div>
-  <label for="player-name">Name:</label>
-  <input id="player-name" placeholder="Your name" />
-  <button id="start">Start Game</button>
-  <button id="pause">Pause</button>
-  <div id="instructions">
-    Use the arrow keys or WASD to move. Hold the spacebar to speed up. Use the <strong>Pause</strong> button or press <kbd>p</kbd> to pause/resume.
+  <div id="layout">
+    <div id="game-wrapper">
+      <canvas id="game" width="600" height="600"></canvas>
+      <div id="game-over" style="display:none">Game Over</div>
+      <div id="paused" style="display:none">Paused</div>
+    </div>
+    <div id="sidebar">
+      <label for="player-name">Name:</label>
+      <input id="player-name" placeholder="Your name" />
+      <button id="start">Start Game</button>
+      <button id="pause">Pause</button>
+      <div id="instructions">
+        Use the arrow keys or WASD to move. Hold the spacebar to speed up. Use the <strong>Pause</strong> button or press <kbd>p</kbd> to pause/resume.
+      </div>
+      <div id="options">
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <label for="theme">Theme:</label>
+        <select id="theme">
+          <option value="classic" selected>Classic</option>
+          <option value="dark">Dark</option>
+          <option value="neon">Neon</option>
+        </select>
+      </div>
+      <p id="score">Score: 0</p>
+      <h2>Leaderboard</h2>
+      <ol id="leaderboard"></ol>
+    </div>
   </div>
-  <div id="options">
-    <label for="difficulty">Difficulty:</label>
-    <select id="difficulty">
-      <option value="easy">Easy</option>
-      <option value="medium" selected>Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-    <label for="theme">Theme:</label>
-    <select id="theme">
-      <option value="classic" selected>Classic</option>
-      <option value="dark">Dark</option>
-      <option value="neon">Neon</option>
-    </select>
-  </div>
-  <p id="score">Score: 0</p>
-  <h2>Leaderboard</h2>
-  <ol id="leaderboard"></ol>
   <script src="script.js"></script>
 </body>
 </html>
