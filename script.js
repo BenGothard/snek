@@ -67,9 +67,9 @@ let running = false;
 let paused = false;
 
 const difficultySettings = {
-  easy: { frame: 150, obstacles: 0 },
-  medium: { frame: 120, obstacles: 5 },
-  hard: { frame: 90, obstacles: 10 }
+  easy: { frame: 150, obstacles: 0, minFrame: 80 },
+  medium: { frame: 120, obstacles: 5, minFrame: 60 },
+  hard: { frame: 90, obstacles: 10, minFrame: 45 }
 };
 let currentDifficulty = 'medium';
 let frameDelay = difficultySettings[currentDifficulty].frame;
@@ -171,6 +171,7 @@ function reset() {
   apples = [];
   obstacles = [];
   frameDelay = difficultySettings[currentDifficulty].frame;
+  updateSpeed();
   for (let i = 0; i < appleCount; i++) {
     apples.push(randomApple());
   }
@@ -186,6 +187,13 @@ function reset() {
 
 function updateScore() {
   scoreEl.textContent = `Score: ${score}`;
+}
+
+function updateSpeed() {
+  const settings = difficultySettings[currentDifficulty];
+  const min = settings.minFrame || 40;
+  const newDelay = Math.max(min, settings.frame - (snake.length - 1) * 2);
+  frameDelay = newDelay;
 }
 
 function gameLoop(timestamp) {
@@ -209,7 +217,7 @@ function gameLoop(timestamp) {
 let lastTime = 0;
 
 function step(timestamp) {
-  const delay = fastMode ? fastFrameDelay : frameDelay;
+  const delay = fastMode ? Math.min(fastFrameDelay, frameDelay) : frameDelay;
   if (timestamp - lastTime < delay) return true;
   lastTime = timestamp;
 
@@ -240,6 +248,7 @@ function step(timestamp) {
       updateScore();
       growing += a.type === 'gold' ? 2 : 1;
       apples[i] = randomApple();
+      updateSpeed();
     }
   }
 
