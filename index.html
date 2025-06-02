@@ -2,13 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Snek</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>Snek</h1>
   <canvas id="game" width="600" height="600"></canvas>
+  <div id="game-over" style="display:none">Game Over</div>
+  <div id="paused" style="display:none">Paused</div>
   <button id="start">Start Game</button>
+  <div id="instructions">
+    Use the arrow keys or WASD to move. Hold the spacebar to speed up. Press P to pause/resume.
+  </div>
   <p id="score">Score: 0</p>
   <h2>Leaderboard</h2>
   <ol id="leaderboard"></ol>
