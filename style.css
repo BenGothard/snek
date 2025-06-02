@@ -13,6 +13,20 @@ canvas {
   height: 90vmin;
 }
 
+@media (orientation: portrait) {
+  canvas {
+    width: 95vmin;
+    height: 95vmin;
+  }
+}
+
+@media (orientation: landscape) {
+  canvas {
+    width: 90vmin;
+    height: 90vmin;
+  }
+}
+
 button {
   margin-top: 10px;
 }
@@ -92,5 +106,12 @@ body.neon canvas {
   canvas {
     width: 95vmin;
     height: 95vmin;
+  }
+}
+
+@media (max-width: 400px) {
+  canvas {
+    width: 100vmin;
+    height: 100vmin;
   }
 }
