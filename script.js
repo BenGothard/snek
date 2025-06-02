@@ -8,11 +8,25 @@ const gridSize = 20;
 const tileCount = canvas.width / gridSize;
 const appleCount = 3;
 
+function isOccupied(x, y) {
+  for (let part of snake) {
+    if (part.x === x && part.y === y) return true;
+  }
+  for (let a of apples) {
+    if (a.x === x && a.y === y) return true;
+  }
+  return false;
+}
+
 function randomApple() {
-  return {
-    x: Math.floor(Math.random() * tileCount),
-    y: Math.floor(Math.random() * tileCount)
-  };
+  let pos;
+  do {
+    pos = {
+      x: Math.floor(Math.random() * tileCount),
+      y: Math.floor(Math.random() * tileCount)
+    };
+  } while (isOccupied(pos.x, pos.y));
+  return pos;
 }
 
 let snake = [{ x: 10, y: 10 }];
