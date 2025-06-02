@@ -100,12 +100,12 @@ async function loadOnlineLeaderboard() {
   }
 }
 
-async function postScoreOnline(score) {
+async function postScoreOnline(scoreData) {
   try {
     await fetch('https://example.com/api/scores', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ score })
+      body: JSON.stringify(scoreData)
     });
   } catch (e) {}
 }
@@ -146,7 +146,9 @@ function renderLeaderboard() {
     leaderboardEl.appendChild(header);
     onlineScores.forEach((s, i) => {
       const li = document.createElement('li');
-      li.textContent = `${i + 1}. ${s}`;
+      li.textContent = s.name
+        ? `${i + 1}. ${s.name}: ${s.score}`
+        : `${i + 1}. ${s}`;
       leaderboardEl.appendChild(li);
     });
   }
@@ -160,7 +162,7 @@ function addScore(newScore) {
   if (list.length > 10) list.length = 10;
   saveLeaderboard(scores);
   renderLeaderboard();
-  postScoreOnline(newScore.score);
+  postScoreOnline(newScore);
 }
 
 function reset() {
