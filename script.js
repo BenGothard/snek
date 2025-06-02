@@ -272,6 +272,15 @@ function draw() {
 
 window.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
+  if (
+    key === ' ' ||
+    key === 'arrowup' ||
+    key === 'arrowdown' ||
+    key === 'arrowleft' ||
+    key === 'arrowright'
+  ) {
+    e.preventDefault();
+  }
   switch (key) {
     case 'arrowup':
     case 'w':
