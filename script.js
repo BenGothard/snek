@@ -73,7 +73,7 @@ let fastMode = false;
 const themes = {
   classic: { bg: '#222', snake: 'lime', apple: 'red', gold: 'gold', obstacle: 'gray' },
   dark: { bg: '#111', snake: '#0f0', apple: '#f55', gold: '#ff0', obstacle: '#666' },
-  neon: { bg: '#000', snake: '#0ff', apple: '#f0f', gold: '#ff0', obstacle: '#f0f' }
+  neon: { bg: '#000', snake: '#0ff', apple: '#f0f', gold: '#ff0', obstacle: '#00f' }
 };
 let currentTheme = themes.classic;
 
