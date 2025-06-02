@@ -15,6 +15,20 @@
   <div id="instructions">
     Use the arrow keys or WASD to move. Hold the spacebar to speed up. Press P to pause/resume.
   </div>
+  <div id="options">
+    <label for="difficulty">Difficulty:</label>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+    <label for="theme">Theme:</label>
+    <select id="theme">
+      <option value="classic" selected>Classic</option>
+      <option value="dark">Dark</option>
+      <option value="neon">Neon</option>
+    </select>
+  </div>
   <p id="score">Score: 0</p>
   <h2>Leaderboard</h2>
   <ol id="leaderboard"></ol>
