@@ -145,6 +145,9 @@ window.addEventListener('keydown', e => {
 reset();
 renderLeaderboard();
 startButton.addEventListener('click', () => {
+  // give the snake an initial direction so it doesn't immediately
+  // collide with itself when the game starts
+  velocity = { x: 1, y: 0 };
   startButton.disabled = true;
   running = true;
   lastTime = 0;
