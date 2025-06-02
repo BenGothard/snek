@@ -18,3 +18,7 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 - Choose from multiple visual themes.
 
 Enjoy!
+
+## Testing
+
+Run `npm install` to install dependencies, then run `npm test` to execute the Jest test suite in the `tests/` directory.
