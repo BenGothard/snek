@@ -24,8 +24,16 @@ Enjoy!
 
 ## Setup
 
-Run `./setup.sh` to install the required dependencies (Node.js, npm and
-`http-server`). After running the script you can start a local web server with:
+Make sure Node.js and npm are installed on your system. If you're on
+Debian/Ubuntu you can install them with:
+
+```bash
+sudo apt-get update && sudo apt-get install -y nodejs npm
+```
+
+Once Node.js is available, run `./setup.sh` to install the `http-server`
+package globally. After running the script you can
+start a local web server with:
 
 ```bash
 http-server
