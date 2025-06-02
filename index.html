@@ -16,7 +16,15 @@
   <button id="start">Start Game</button>
   <button id="pause">Pause</button>
   <div id="instructions">
-    Use the arrow keys or WASD to move. Hold the spacebar to speed up. Use the <strong>Pause</strong> button or press <kbd>p</kbd> to pause/resume.
+    Use the arrow keys or WASD to move, or swipe on the canvas. On-screen arrows appear when touch is not available. Hold the spacebar to speed up. Use the <strong>Pause</strong> button or press <kbd>p</kbd> to pause/resume.
+  </div>
+  <div id="touch-controls" style="display:none">
+    <button data-dir="up">↑</button>
+    <div>
+      <button data-dir="left">←</button>
+      <button data-dir="right">→</button>
+    </div>
+    <button data-dir="down">↓</button>
   </div>
   <div id="options">
     <label for="difficulty">Difficulty:</label>
