@@ -27,6 +27,8 @@ button {
   max-width: 200px;
   margin: 10px auto;
   text-align: left;
+  max-height: 200px;
+  overflow: hidden;
 }
 
 h1 {
