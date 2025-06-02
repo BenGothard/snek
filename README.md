@@ -35,4 +35,11 @@ Then open the provided URL in your browser to play the game locally.
 
 ### Online scores
 
-The game tries to submit scores, including player names, to `https://example.com/api/scores`. Replace this URL in `script.js` with your own service or remove the calls to disable the feature.
+The game tries to submit scores, including player names, to a placeholder
+endpoint.
+
+#### Using a real backend
+
+Open `script.js` and search for `example.com/api/scores`. Replace the placeholder
+URL with the address of your server. Removing the calls to `postScoreOnline`
+will disable online score submission entirely.
