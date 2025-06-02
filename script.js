@@ -6,10 +6,18 @@ const leaderboardEl = document.getElementById('leaderboard');
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
+const appleCount = 3;
+
+function randomApple() {
+  return {
+    x: Math.floor(Math.random() * tileCount),
+    y: Math.floor(Math.random() * tileCount)
+  };
+}
 
 let snake = [{ x: 10, y: 10 }];
 let velocity = { x: 0, y: 0 };
-let apple = { x: 5, y: 5 };
+let apples = [];
 let growing = 0;
 let score = 0;
 let running = false;
@@ -45,7 +53,10 @@ function addScore(newScore) {
 function reset() {
   snake = [{ x: 10, y: 10 }];
   velocity = { x: 0, y: 0 };
-  apple = { x: Math.floor(Math.random() * tileCount), y: Math.floor(Math.random() * tileCount) };
+  apples = [];
+  for (let i = 0; i < appleCount; i++) {
+    apples.push(randomApple());
+  }
   growing = 0;
   score = 0;
   updateScore();
@@ -90,12 +101,14 @@ function step(timestamp) {
 
   snake.unshift(head);
 
-  if (head.x === apple.x && head.y === apple.y) {
-    score++;
-    updateScore();
-    growing += 1;
-    apple.x = Math.floor(Math.random() * tileCount);
-    apple.y = Math.floor(Math.random() * tileCount);
+  for (let i = 0; i < apples.length; i++) {
+    const a = apples[i];
+    if (head.x === a.x && head.y === a.y) {
+      score++;
+      updateScore();
+      growing += 1;
+      apples[i] = randomApple();
+    }
   }
 
   if (growing > 0) {
@@ -117,7 +130,9 @@ function draw() {
   }
 
   ctx.fillStyle = 'red';
-  ctx.fillRect(apple.x * gridSize, apple.y * gridSize, gridSize - 1, gridSize - 1);
+  for (let a of apples) {
+    ctx.fillRect(a.x * gridSize, a.y * gridSize, gridSize - 1, gridSize - 1);
+  }
 }
 
 window.addEventListener('keydown', e => {
