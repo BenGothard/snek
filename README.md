@@ -18,3 +18,14 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 - Choose from multiple visual themes.
 
 Enjoy!
+
+## Setup
+
+Run `./setup.sh` to install the required dependencies (Node.js, npm and
+`http-server`). After running the script you can start a local web server with:
+
+```bash
+http-server
+```
+
+Then open the provided URL in your browser to play the game locally.
