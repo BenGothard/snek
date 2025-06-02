@@ -2,11 +2,17 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const startButton = document.getElementById('start');
+const pauseButton = document.getElementById('pause');
+const playerNameInput = document.getElementById('player-name');
 const leaderboardEl = document.getElementById('leaderboard');
 const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const difficultySelect = document.getElementById('difficulty');
 const themeSelect = document.getElementById('theme');
+
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  themeSelect.value = 'dark';
+}
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
@@ -75,9 +81,12 @@ const themes = {
   dark: { bg: '#111', snake: '#0f0', apple: '#f55', gold: '#ff0', obstacle: '#666' },
   neon: { bg: '#000', snake: '#0ff', apple: '#f0f', gold: '#ff0', obstacle: '#0f0' }
 };
-let currentTheme = themes.classic;
+let currentTheme = themes[themeSelect.value] || themes.classic;
+document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
+canvas.style.background = currentTheme.bg;
 
 let onlineScores = [];
+let playerName = '';
 
 async function loadOnlineLeaderboard() {
   try {
@@ -103,11 +112,18 @@ async function postScoreOnline(score) {
 
 function loadLeaderboard() {
   const data = localStorage.getItem('leaderboard');
-  if (!data) return [];
+  if (!data) {
+    return { easy: [], medium: [], hard: [] };
+  }
   try {
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    return {
+      easy: parsed.easy || [],
+      medium: parsed.medium || [],
+      hard: parsed.hard || []
+    };
   } catch (e) {
-    return [];
+    return { easy: [], medium: [], hard: [] };
   }
 }
 
@@ -117,10 +133,11 @@ function saveLeaderboard(scores) {
 
 function renderLeaderboard() {
   const scores = loadLeaderboard();
+  const list = scores[currentDifficulty] || [];
   leaderboardEl.innerHTML = '';
-  scores.forEach((s, i) => {
+  list.forEach((s, i) => {
     const li = document.createElement('li');
-    li.textContent = `${i + 1}. ${s}`;
+    li.textContent = `${i + 1}. ${s.name}: ${s.score}`;
     leaderboardEl.appendChild(li);
   });
   if (onlineScores.length) {
@@ -137,12 +154,13 @@ function renderLeaderboard() {
 
 function addScore(newScore) {
   const scores = loadLeaderboard();
-  scores.push(newScore);
-  scores.sort((a, b) => b - a);
-  if (scores.length > 10) scores.length = 10;
+  const list = scores[currentDifficulty];
+  list.push(newScore);
+  list.sort((a, b) => b.score - a.score);
+  if (list.length > 10) list.length = 10;
   saveLeaderboard(scores);
   renderLeaderboard();
-  postScoreOnline(newScore);
+  postScoreOnline(newScore.score);
 }
 
 function reset() {
@@ -161,6 +179,7 @@ function reset() {
   score = 0;
   updateScore();
   canvas.style.background = currentTheme.bg;
+  document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
 }
 
 function updateScore() {
@@ -177,7 +196,7 @@ function gameLoop(timestamp) {
     draw();
     requestAnimationFrame(gameLoop);
   } else {
-    addScore(score);
+    addScore({ name: playerName || 'Anonymous', score });
     reset();
     gameOverEl.style.display = 'block';
     running = false;
@@ -296,11 +315,13 @@ window.addEventListener('keyup', e => {
 difficultySelect.addEventListener('change', () => {
   currentDifficulty = difficultySelect.value;
   if (!running) reset();
+  renderLeaderboard();
 });
 
 themeSelect.addEventListener('change', () => {
   currentTheme = themes[themeSelect.value] || themes.classic;
   canvas.style.background = currentTheme.bg;
+  document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
   if (!running) draw();
 });
 
@@ -311,6 +332,7 @@ startButton.addEventListener('click', () => {
   // give the snake an initial direction so it doesn't immediately
   // collide with itself when the game starts
   velocity = { x: 1, y: 0 };
+  playerName = playerNameInput.value.trim() || 'Anonymous';
   startButton.disabled = true;
   gameOverEl.style.display = 'none';
   paused = false;
@@ -318,4 +340,13 @@ startButton.addEventListener('click', () => {
   running = true;
   lastTime = 0;
   requestAnimationFrame(gameLoop);
+});
+
+pauseButton.addEventListener('click', () => {
+  if (!running) return;
+  paused = !paused;
+  pausedEl.style.display = paused ? 'block' : 'none';
+  if (!paused) {
+    requestAnimationFrame(gameLoop);
+  }
 });
