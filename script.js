@@ -3,6 +3,8 @@ const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const startButton = document.getElementById('start');
 const leaderboardEl = document.getElementById('leaderboard');
+const gameOverEl = document.getElementById('game-over');
+const pausedEl = document.getElementById('paused');
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
@@ -35,10 +37,16 @@ let apples = [];
 let growing = 0;
 let score = 0;
 let running = false;
+let paused = false;
 
 function loadLeaderboard() {
   const data = localStorage.getItem('leaderboard');
-  return data ? JSON.parse(data) : [];
+  if (!data) return [];
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return [];
+  }
 }
 
 function saveLeaderboard(scores) {
@@ -82,12 +90,17 @@ function updateScore() {
 
 function gameLoop(timestamp) {
   if (!running) return;
+  if (paused) {
+    requestAnimationFrame(gameLoop);
+    return;
+  }
   if (step(timestamp)) {
     draw();
     requestAnimationFrame(gameLoop);
   } else {
     addScore(score);
     reset();
+    gameOverEl.style.display = 'block';
     running = false;
     startButton.disabled = false;
   }
@@ -178,6 +191,13 @@ window.addEventListener('keydown', e => {
     case ' ': // spacebar
       fastMode = true;
       break;
+    case 'p':
+      paused = !paused;
+      pausedEl.style.display = paused ? 'block' : 'none';
+      if (!paused) {
+        requestAnimationFrame(gameLoop);
+      }
+      break;
   }
 });
 
@@ -194,6 +214,9 @@ startButton.addEventListener('click', () => {
   // collide with itself when the game starts
   velocity = { x: 1, y: 0 };
   startButton.disabled = true;
+  gameOverEl.style.display = 'none';
+  paused = false;
+  pausedEl.style.display = 'none';
   running = true;
   lastTime = 0;
   requestAnimationFrame(gameLoop);
