@@ -361,3 +361,59 @@ pauseButton.addEventListener('click', () => {
     requestAnimationFrame(gameLoop);
   }
 });
+// Touch controls - swipe detection
+let touchStartX = null;
+let touchStartY = null;
+const swipeThreshold = 30;
+
+canvas.addEventListener('touchstart', e => {
+  const t = e.touches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+});
+
+canvas.addEventListener('touchend', e => {
+  if (touchStartX === null || touchStartY === null) return;
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    if (Math.abs(dx) > swipeThreshold) {
+      if (dx > 0 && velocity.x !== -1) velocity = { x: 1, y: 0 };
+      else if (dx < 0 && velocity.x !== 1) velocity = { x: -1, y: 0 };
+    }
+  } else {
+    if (Math.abs(dy) > swipeThreshold) {
+      if (dy > 0 && velocity.y !== -1) velocity = { x: 0, y: 1 };
+      else if (dy < 0 && velocity.y !== 1) velocity = { x: 0, y: -1 };
+    }
+  }
+  touchStartX = null;
+  touchStartY = null;
+});
+
+// On-screen buttons for non-touch devices
+const controls = document.getElementById('touch-controls');
+if (controls) {
+  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (!hasTouch) controls.style.display = 'block';
+  controls.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = btn.dataset.dir;
+      switch (dir) {
+        case 'up':
+          if (velocity.y !== 1) velocity = { x: 0, y: -1 };
+          break;
+        case 'down':
+          if (velocity.y !== -1) velocity = { x: 0, y: 1 };
+          break;
+        case 'left':
+          if (velocity.x !== 1) velocity = { x: -1, y: 0 };
+          break;
+        case 'right':
+          if (velocity.x !== -1) velocity = { x: 1, y: 0 };
+          break;
+      }
+    });
+  });
+}

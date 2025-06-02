@@ -94,3 +94,17 @@ body.neon canvas {
     height: 95vmin;
   }
 }
+
+#touch-controls {
+  margin-top: 10px;
+}
+#touch-controls button {
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  font-size: 1.2em;
+}
+#touch-controls div {
+  display: flex;
+  justify-content: center;
+}
