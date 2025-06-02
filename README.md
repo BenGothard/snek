@@ -35,4 +35,4 @@ Then open the provided URL in your browser to play the game locally.
 
 ### Online scores
 
-The game tries to submit scores to `https://example.com/api/scores`. Replace this URL in `script.js` with your own service or remove the calls to disable the feature.
+The game tries to submit scores, including player names, to `https://example.com/api/scores`. Replace this URL in `script.js` with your own service or remove the calls to disable the feature.
