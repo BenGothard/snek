@@ -1,6 +1,7 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
+const startButton = document.getElementById('start');
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
@@ -10,6 +11,7 @@ let velocity = { x: 0, y: 0 };
 let apple = { x: 5, y: 5 };
 let growing = 0;
 let score = 0;
+let running = false;
 
 function reset() {
   snake = [{ x: 10, y: 10 }];
@@ -24,12 +26,15 @@ function updateScore() {
   scoreEl.textContent = `Score: ${score}`;
 }
 
-function gameLoop() {
-  requestAnimationFrame(gameLoop);
-  if (step()) {
+function gameLoop(timestamp) {
+  if (!running) return;
+  if (step(timestamp)) {
     draw();
+    requestAnimationFrame(gameLoop);
   } else {
     reset();
+    running = false;
+    startButton.disabled = false;
   }
 }
 
@@ -109,4 +114,9 @@ window.addEventListener('keydown', e => {
 });
 
 reset();
-requestAnimationFrame(gameLoop);
+startButton.addEventListener('click', () => {
+  startButton.disabled = true;
+  running = true;
+  lastTime = 0;
+  requestAnimationFrame(gameLoop);
+});
