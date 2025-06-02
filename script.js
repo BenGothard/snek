@@ -2,6 +2,7 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const startButton = document.getElementById('start');
+const leaderboardEl = document.getElementById('leaderboard');
 
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
@@ -12,6 +13,34 @@ let apple = { x: 5, y: 5 };
 let growing = 0;
 let score = 0;
 let running = false;
+
+function loadLeaderboard() {
+  const data = localStorage.getItem('leaderboard');
+  return data ? JSON.parse(data) : [];
+}
+
+function saveLeaderboard(scores) {
+  localStorage.setItem('leaderboard', JSON.stringify(scores));
+}
+
+function renderLeaderboard() {
+  const scores = loadLeaderboard();
+  leaderboardEl.innerHTML = '';
+  scores.forEach((s, i) => {
+    const li = document.createElement('li');
+    li.textContent = `${i + 1}. ${s}`;
+    leaderboardEl.appendChild(li);
+  });
+}
+
+function addScore(newScore) {
+  const scores = loadLeaderboard();
+  scores.push(newScore);
+  scores.sort((a, b) => b - a);
+  if (scores.length > 10) scores.length = 10;
+  saveLeaderboard(scores);
+  renderLeaderboard();
+}
 
 function reset() {
   snake = [{ x: 10, y: 10 }];
@@ -32,6 +61,7 @@ function gameLoop(timestamp) {
     draw();
     requestAnimationFrame(gameLoop);
   } else {
+    addScore(score);
     reset();
     running = false;
     startButton.disabled = false;
@@ -113,6 +143,7 @@ window.addEventListener('keydown', e => {
 });
 
 reset();
+renderLeaderboard();
 startButton.addEventListener('click', () => {
   startButton.disabled = true;
   running = true;
