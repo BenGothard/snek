@@ -10,6 +10,10 @@ const pausedEl = document.getElementById('paused');
 const difficultySelect = document.getElementById('difficulty');
 const themeSelect = document.getElementById('theme');
 
+// Sound effects
+const eatSound = new Audio('assets/eat.mp3');
+const gameOverSound = new Audio('assets/gameover.mp3');
+
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
   themeSelect.value = 'dark';
 }
@@ -209,6 +213,8 @@ function gameLoop(timestamp) {
     addScore({ name: playerName || 'Anonymous', score });
     reset();
     gameOverEl.style.display = 'block';
+    gameOverSound.currentTime = 0;
+    gameOverSound.play();
     running = false;
     startButton.disabled = false;
   }
@@ -246,6 +252,8 @@ function step(timestamp) {
     if (head.x === a.x && head.y === a.y) {
       score += a.type === 'gold' ? 5 : 1;
       updateScore();
+      eatSound.currentTime = 0;
+      eatSound.play();
       growing += a.type === 'gold' ? 2 : 1;
       apples[i] = randomApple();
       updateSpeed();
