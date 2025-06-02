@@ -77,10 +77,9 @@ function step(timestamp) {
 
   const head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
 
-  // end the game if the snake hits the edges
-  if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-    return false;
-  }
+  // allow the snake to wrap around the edges
+  head.x = (head.x + tileCount) % tileCount;
+  head.y = (head.y + tileCount) % tileCount;
 
   // check collision with self
   for (let part of snake) {
@@ -122,20 +121,25 @@ function draw() {
 }
 
 window.addEventListener('keydown', e => {
-  switch (e.key) {
-    case 'ArrowUp':
+  const key = e.key.toLowerCase();
+  switch (key) {
+    case 'arrowup':
+    case 'w':
       if (velocity.y === 1) break;
       velocity = { x: 0, y: -1 };
       break;
-    case 'ArrowDown':
+    case 'arrowdown':
+    case 's':
       if (velocity.y === -1) break;
       velocity = { x: 0, y: 1 };
       break;
-    case 'ArrowLeft':
+    case 'arrowleft':
+    case 'a':
       if (velocity.x === 1) break;
       velocity = { x: -1, y: 0 };
       break;
-    case 'ArrowRight':
+    case 'arrowright':
+    case 'd':
       if (velocity.x === -1) break;
       velocity = { x: 1, y: 0 };
       break;
