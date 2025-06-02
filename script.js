@@ -39,7 +39,7 @@ function gameLoop(timestamp) {
 }
 
 let lastTime = 0;
-const frameDelay = 100; // ms
+const frameDelay = 150; // ms
 
 function step(timestamp) {
   if (timestamp - lastTime < frameDelay) return true;
@@ -47,11 +47,10 @@ function step(timestamp) {
 
   const head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
 
-  // wrap around the edges
-  if (head.x < 0) head.x = tileCount - 1;
-  if (head.x >= tileCount) head.x = 0;
-  if (head.y < 0) head.y = tileCount - 1;
-  if (head.y >= tileCount) head.y = 0;
+  // end the game if the snake hits the edges
+  if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+    return false;
+  }
 
   // check collision with self
   for (let part of snake) {
