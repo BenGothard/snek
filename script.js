@@ -773,10 +773,12 @@ pauseButton.addEventListener('click', () => {
 });
 
 function attachTouch(el, dir) {
-  el.addEventListener('touchstart', e => {
+  const handler = e => {
     e.preventDefault();
     setDirection(dir);
-  });
+  };
+  el.addEventListener('touchstart', handler);
+  el.addEventListener('click', handler);
   el.addEventListener('touchend', e => e.preventDefault());
 }
 
@@ -788,7 +790,7 @@ if (upBtn) {
 }
 
 if (pauseTouchBtn) {
-  pauseTouchBtn.addEventListener('touchstart', e => {
+  const handlePause = e => {
     e.preventDefault();
     if (!running) return;
     paused = !paused;
@@ -796,6 +798,8 @@ if (pauseTouchBtn) {
     if (!paused) {
       requestAnimationFrame(gameLoop);
     }
-  });
+  };
+  pauseTouchBtn.addEventListener('touchstart', handlePause);
+  pauseTouchBtn.addEventListener('click', handlePause);
   pauseTouchBtn.addEventListener('touchend', e => e.preventDefault());
 }
