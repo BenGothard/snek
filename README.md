@@ -31,12 +31,12 @@ Debian/Ubuntu you can install them with:
 sudo apt-get update && sudo apt-get install -y nodejs npm
 ```
 
-Once Node.js is available, run `./setup.sh` to install the `http-server`
-package globally. After running the script you can
-start a local web server with:
+Once Node.js is available, run `./setup.sh` to install the project
+dependencies. After running the script you can start a local web server
+with:
 
 ```bash
-http-server
+npm run serve
 ```
 
 Then open the provided URL in your browser to play the game locally.

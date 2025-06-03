@@ -11,9 +11,7 @@ if ! command -v node >/dev/null 2>&1; then
     exit 1
 fi
 
-# Install http-server globally for serving the project
-if ! command -v http-server >/dev/null 2>&1; then
-    npm install -g http-server
-fi
+# Install project dependencies locally
+npm install
 
-echo "Setup complete. Use 'http-server' to run the game locally."
+echo "Setup complete. Use 'npm run serve' to run the game locally."
