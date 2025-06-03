@@ -3,7 +3,7 @@ import { isOccupied, randomApple, updateSpeed as calcSpeed } from './game.js';
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
-const npcScoreEl = document.getElementById('npc-score');
+const npcScoresEl = document.getElementById('npc-scores');
 const startButton = document.getElementById('start');
 const pauseButton = document.getElementById('pause');
 const playerNameInput = document.getElementById('player-name');
@@ -27,6 +27,7 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
 const appleCount = 3;
+const NPC_COUNT = 3;
 
 function randomObstacle() {
   const maxAttempts = 100;
@@ -35,7 +36,7 @@ function randomObstacle() {
       x: Math.floor(Math.random() * tileCount),
       y: Math.floor(Math.random() * tileCount)
     };
-    if (!isOccupied(pos.x, pos.y, snake.concat(npcSnake), apples, obstacles)) {
+    if (!isOccupied(pos.x, pos.y, snake.concat(getAllNpcParts()), apples, obstacles)) {
       return pos;
     }
   }
@@ -44,14 +45,14 @@ function randomObstacle() {
 
 let snake = [{ x: 10, y: 10 }];
 let velocity = { x: 0, y: 0 };
-let npcSnake = [{ x: tileCount - 10, y: tileCount - 10 }];
-let npcVelocity = { x: 0, y: 0 };
+let npcs = [];
+function getAllNpcParts() {
+  return npcs.flatMap(npc => npc.snake);
+}
 let apples = [];
 let obstacles = [];
 let growing = 0;
-let npcGrowing = 0;
 let score = 0;
-let npcScore = 0;
 let running = false;
 let paused = false;
 
@@ -178,14 +179,12 @@ function addScore(newScore) {
 function reset() {
   snake = [{ x: 10, y: 10 }];
   velocity = { x: 0, y: 0 };
-  npcSnake = [{ x: tileCount - 10, y: tileCount - 10 }];
-  npcVelocity = { x: 0, y: 0 };
   apples = [];
   obstacles = [];
   frameDelay = difficultySettings[currentDifficulty].frame;
   frameDelay = calcSpeed(snake.length, difficultySettings, currentDifficulty);
   for (let i = 0; i < appleCount; i++) {
-    const a = randomApple(tileCount, snake.concat(npcSnake), apples, obstacles);
+    const a = randomApple(tileCount, snake.concat(getAllNpcParts()), apples, obstacles);
     if (a) {
       apples.push(a);
     } else {
@@ -201,9 +200,21 @@ function reset() {
     }
   }
   growing = 0;
-  npcGrowing = 0;
   score = 0;
-  npcScore = 0;
+  npcs = [];
+  npcScoresEl.innerHTML = '';
+  for (let i = 0; i < NPC_COUNT; i++) {
+    const npc = {
+      snake: [{ x: tileCount - 10 - i, y: tileCount - 10 }],
+      velocity: { x: 0, y: 0 },
+      growing: 0,
+      score: 0,
+      scoreEl: document.createElement('p')
+    };
+    npc.scoreEl.textContent = `NPC ${i + 1} Score: 0`;
+    npcScoresEl.appendChild(npc.scoreEl);
+    npcs.push(npc);
+  }
   updateScore();
   canvas.style.background = currentTheme.bg;
   document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
@@ -211,7 +222,9 @@ function reset() {
 
 function updateScore() {
   scoreEl.textContent = `Score: ${score}`;
-  npcScoreEl.textContent = `NPC Score: ${npcScore}`;
+  npcs.forEach((npc, i) => {
+    npc.scoreEl.textContent = `NPC ${i + 1} Score: ${npc.score}`;
+  });
 }
 
 
@@ -237,9 +250,9 @@ function gameLoop(timestamp) {
 
 let lastTime = 0;
 
-function chooseNpcVelocity() {
+function chooseNpcVelocity(npc) {
   if (!apples.length) return;
-  const head = npcSnake[0];
+  const head = npc.snake[0];
   const target = apples[0];
 
   function diff(a, b) {
@@ -271,13 +284,23 @@ function chooseNpcVelocity() {
       }
     }
     if (blocked) continue;
-    for (const part of npcSnake) {
+    for (const part of npc.snake) {
       if (part.x === nx && part.y === ny) {
         blocked = true;
         break;
       }
     }
     if (blocked) continue;
+    for (const other of npcs) {
+      if (other === npc) continue;
+      for (const part of other.snake) {
+        if (part.x === nx && part.y === ny) {
+          blocked = true;
+          break;
+        }
+      }
+      if (blocked) break;
+    }
     for (const obs of obstacles) {
       if (obs.x === nx && obs.y === ny) {
         blocked = true;
@@ -285,7 +308,7 @@ function chooseNpcVelocity() {
       }
     }
     if (!blocked) {
-      npcVelocity = dir;
+      npc.velocity = dir;
       return;
     }
   }
@@ -296,7 +319,9 @@ function step(timestamp) {
   if (timestamp - lastTime < delay) return true;
   lastTime = timestamp;
 
-  chooseNpcVelocity();
+  for (const npc of npcs) {
+    chooseNpcVelocity(npc);
+  }
 
   const head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
 
@@ -310,9 +335,11 @@ function step(timestamp) {
       return false;
     }
   }
-  for (let part of npcSnake) {
-    if (part.x === head.x && part.y === head.y) {
-      return false;
+  for (const npc of npcs) {
+    for (let part of npc.snake) {
+      if (part.x === head.x && part.y === head.y) {
+        return false;
+      }
     }
   }
   for (let obs of obstacles) {
@@ -333,7 +360,7 @@ function step(timestamp) {
       growing += a.type === 'gold' ? 2 : 1;
       const newApple = randomApple(
         tileCount,
-        snake.concat(npcSnake),
+        snake.concat(getAllNpcParts()),
         apples,
         obstacles
       );
@@ -353,62 +380,75 @@ function step(timestamp) {
     snake.pop();
   }
 
-  const npcHead = { x: npcSnake[0].x + npcVelocity.x, y: npcSnake[0].y + npcVelocity.y };
-  npcHead.x = (npcHead.x + tileCount) % tileCount;
-  npcHead.y = (npcHead.y + tileCount) % tileCount;
+  for (const npc of npcs) {
+    const npcHead = { x: npc.snake[0].x + npc.velocity.x, y: npc.snake[0].y + npc.velocity.y };
+    npcHead.x = (npcHead.x + tileCount) % tileCount;
+    npcHead.y = (npcHead.y + tileCount) % tileCount;
 
-  for (let part of snake) {
-    if (part.x === npcHead.x && part.y === npcHead.y) {
-      return false;
-    }
-  }
-  for (let obs of obstacles) {
-    if (obs.x === npcHead.x && obs.y === npcHead.y) {
-      npcVelocity = { x: 0, y: 0 };
-      npcHead.x = npcSnake[0].x;
-      npcHead.y = npcSnake[0].y;
-      break;
-    }
-  }
-  for (let part of npcSnake) {
-    if (part.x === npcHead.x && part.y === npcHead.y) {
-      npcVelocity = { x: 0, y: 0 };
-      npcHead.x = npcSnake[0].x;
-      npcHead.y = npcSnake[0].y;
-      break;
-    }
-  }
-
-  npcSnake.unshift({ x: npcHead.x, y: npcHead.y });
-
-  for (let i = 0; i < apples.length; i++) {
-    const a = apples[i];
-    if (npcHead.x === a.x && npcHead.y === a.y) {
-      npcScore += a.type === 'gold' ? 5 : 1;
-      updateScore();
-      eatSound.currentTime = 0;
-      eatSound.play();
-      npcGrowing += a.type === 'gold' ? 2 : 1;
-      const newApple = randomApple(
-        tileCount,
-        snake.concat(npcSnake),
-        apples,
-        obstacles
-      );
-      if (newApple) {
-        apples[i] = newApple;
-      } else {
-        apples.splice(i, 1);
-        i--;
+    for (let part of snake) {
+      if (part.x === npcHead.x && part.y === npcHead.y) {
+        return false;
       }
-      break;
     }
-  }
+    for (const other of npcs) {
+      if (other === npc) continue;
+      for (let part of other.snake) {
+        if (part.x === npcHead.x && part.y === npcHead.y) {
+          npc.velocity = { x: 0, y: 0 };
+          npcHead.x = npc.snake[0].x;
+          npcHead.y = npc.snake[0].y;
+          break;
+        }
+      }
+    }
+    for (let obs of obstacles) {
+      if (obs.x === npcHead.x && obs.y === npcHead.y) {
+        npc.velocity = { x: 0, y: 0 };
+        npcHead.x = npc.snake[0].x;
+        npcHead.y = npc.snake[0].y;
+        break;
+      }
+    }
+    for (let part of npc.snake) {
+      if (part.x === npcHead.x && part.y === npcHead.y) {
+        npc.velocity = { x: 0, y: 0 };
+        npcHead.x = npc.snake[0].x;
+        npcHead.y = npc.snake[0].y;
+        break;
+      }
+    }
 
-  if (npcGrowing > 0) {
-    npcGrowing--;
-  } else {
-    npcSnake.pop();
+    npc.snake.unshift({ x: npcHead.x, y: npcHead.y });
+
+    for (let i = 0; i < apples.length; i++) {
+      const a = apples[i];
+      if (npcHead.x === a.x && npcHead.y === a.y) {
+        npc.score += a.type === 'gold' ? 5 : 1;
+        updateScore();
+        eatSound.currentTime = 0;
+        eatSound.play();
+        npc.growing += a.type === 'gold' ? 2 : 1;
+        const newApple = randomApple(
+          tileCount,
+          snake.concat(getAllNpcParts()),
+          apples,
+          obstacles
+        );
+        if (newApple) {
+          apples[i] = newApple;
+        } else {
+          apples.splice(i, 1);
+          i--;
+        }
+        break;
+      }
+    }
+
+    if (npc.growing > 0) {
+      npc.growing--;
+    } else {
+      npc.snake.pop();
+    }
   }
 
   return true;
@@ -424,8 +464,10 @@ function draw() {
   }
 
   ctx.fillStyle = currentTheme.npc;
-  for (let part of npcSnake) {
-    ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 1, gridSize - 1);
+  for (const npc of npcs) {
+    for (let part of npc.snake) {
+      ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 1, gridSize - 1);
+    }
   }
 
   for (let a of apples) {
