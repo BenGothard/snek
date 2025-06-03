@@ -34,6 +34,8 @@ const gridSize = 10;
 const tileCount = canvas.width / gridSize;
 const appleCount = 3;
 const NPC_COUNT = 3;
+const NPC_SPAWN_MIN = 2000; // minimum respawn delay in ms
+const NPC_SPAWN_MAX = 5000; // maximum respawn delay in ms
 
 function randomObstacle() {
   const maxAttempts = 100;
@@ -68,6 +70,32 @@ let velocity = { x: 0, y: 0 };
 let npcs = [];
 function getAllNpcParts() {
   return npcs.flatMap(npc => npc.snake);
+}
+
+function spawnNpc() {
+  if (npcs.length >= NPC_COUNT) return;
+  const startPos = randomNpcStart();
+  if (!startPos) return;
+  const npc = {
+    snake: [startPos],
+    velocity: { x: 0, y: 0 },
+    growing: 0,
+    score: 0,
+    scoreEl: document.createElement('p')
+  };
+  npc.scoreEl.textContent = `NPC ${npcs.length + 1} Score: 0`;
+  npcScoresEl.appendChild(npc.scoreEl);
+  npcs.push(npc);
+  updateScore();
+}
+
+function scheduleNpcSpawn() {
+  const delay =
+    NPC_SPAWN_MIN + Math.random() * (NPC_SPAWN_MAX - NPC_SPAWN_MIN);
+  setTimeout(() => {
+    if (!running) return;
+    spawnNpc();
+  }, delay);
 }
 let apples = [];
 let obstacles = [];
@@ -232,17 +260,7 @@ function reset() {
   npcs = [];
   npcScoresEl.innerHTML = '';
   for (let i = 0; i < NPC_COUNT; i++) {
-    const startPos = randomNpcStart() || { x: tileCount - 10 - i, y: tileCount - 10 };
-    const npc = {
-      snake: [startPos],
-      velocity: { x: 0, y: 0 },
-      growing: 0,
-      score: 0,
-      scoreEl: document.createElement('p')
-    };
-    npc.scoreEl.textContent = `NPC ${i + 1} Score: 0`;
-    npcScoresEl.appendChild(npc.scoreEl);
-    npcs.push(npc);
+    spawnNpc();
   }
   updateScore();
   canvas.style.background = currentTheme.bg;
@@ -267,6 +285,8 @@ function updateScore() {
 function removeNpc(npc) {
   npc.scoreEl.remove();
   npcs = npcs.filter(n => n !== npc);
+  updateScore();
+  scheduleNpcSpawn();
 }
 
 
