@@ -21,11 +21,14 @@ export function randomApple(tileCount, snake = [], apples = [], obstacles = [], 
       y: Math.floor(rng() * tileCount)
     };
     if (!isOccupied(pos.x, pos.y, snake, apples, obstacles)) {
-      return {
-        x: pos.x,
-        y: pos.y,
-        type: rng() < 0.1 ? 'gold' : 'normal'
-      };
+      const r = rng();
+      let type = 'normal';
+      if (r < 0.05) {
+        type = 'speed';
+      } else if (r < 0.1) {
+        type = 'gold';
+      }
+      return { x: pos.x, y: pos.y, type };
     }
   }
   return null;
