@@ -27,26 +27,39 @@ canvas {
   background: #222;
   display: block;
   margin: 0 auto;
-  width: 90vmin;
-  height: 90vmin;
+  width: 80vmin;
+  height: 80vmin;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: width 0.2s ease, height 0.2s ease;
 }
 
 @media (orientation: portrait) {
   canvas {
-    width: 95vmin;
-    height: 95vmin;
+    width: 85vmin;
+    height: 85vmin;
   }
 }
 
 @media (orientation: landscape) {
   canvas {
-    width: 90vmin;
-    height: 90vmin;
+    width: 80vmin;
+    height: 80vmin;
   }
 }
 
 button {
   margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #5c9ded;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+button:hover {
+  background: #4a8ad4;
 }
 
 #player-name {
@@ -142,14 +155,14 @@ body.neon canvas {
 
 @media (max-width: 700px) {
   canvas {
-    width: 95vmin;
-    height: 95vmin;
+    width: 85vmin;
+    height: 85vmin;
   }
 }
 
 @media (max-width: 400px) {
   canvas {
-    width: 100vmin;
-    height: 100vmin;
+    width: 90vmin;
+    height: 90vmin;
   }
 }
