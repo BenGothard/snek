@@ -1,3 +1,5 @@
+import { isOccupied, randomApple, updateSpeed } from './game.js';
+
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
@@ -22,33 +24,6 @@ const gridSize = 20;
 const tileCount = canvas.width / gridSize;
 const appleCount = 3;
 
-function isOccupied(x, y) {
-  for (let part of snake) {
-    if (part.x === x && part.y === y) return true;
-  }
-  for (let a of apples) {
-    if (a.x === x && a.y === y) return true;
-  }
-  for (let o of obstacles) {
-    if (o.x === x && o.y === y) return true;
-  }
-  return false;
-}
-
-function randomApple() {
-  let pos;
-  do {
-    pos = {
-      x: Math.floor(Math.random() * tileCount),
-      y: Math.floor(Math.random() * tileCount)
-    };
-  } while (isOccupied(pos.x, pos.y));
-  return {
-    x: pos.x,
-    y: pos.y,
-    type: Math.random() < 0.1 ? 'gold' : 'normal'
-  };
-}
 
 function randomObstacle() {
   let pos;
@@ -57,7 +32,7 @@ function randomObstacle() {
       x: Math.floor(Math.random() * tileCount),
       y: Math.floor(Math.random() * tileCount)
     };
-  } while (isOccupied(pos.x, pos.y));
+  } while (isOccupied(pos.x, pos.y, snake, apples, obstacles));
   return pos;
 }
 
@@ -175,9 +150,9 @@ function reset() {
   apples = [];
   obstacles = [];
   frameDelay = difficultySettings[currentDifficulty].frame;
-  updateSpeed();
+  frameDelay = updateSpeed(snake.length, difficultySettings[currentDifficulty]);
   for (let i = 0; i < appleCount; i++) {
-    apples.push(randomApple());
+    apples.push(randomApple(tileCount, snake, apples, obstacles));
   }
   for (let i = 0; i < difficultySettings[currentDifficulty].obstacles; i++) {
     obstacles.push(randomObstacle());
@@ -193,12 +168,6 @@ function updateScore() {
   scoreEl.textContent = `Score: ${score}`;
 }
 
-function updateSpeed() {
-  const settings = difficultySettings[currentDifficulty];
-  const min = settings.minFrame || 40;
-  const newDelay = Math.max(min, settings.frame - (snake.length - 1) * 2);
-  frameDelay = newDelay;
-}
 
 function gameLoop(timestamp) {
   if (!running) return;
@@ -255,8 +224,8 @@ function step(timestamp) {
       eatSound.currentTime = 0;
       eatSound.play();
       growing += a.type === 'gold' ? 2 : 1;
-      apples[i] = randomApple();
-      updateSpeed();
+      apples[i] = randomApple(tileCount, snake, apples, obstacles);
+      frameDelay = updateSpeed(snake.length, difficultySettings[currentDifficulty]);
     }
   }
 
