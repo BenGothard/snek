@@ -48,6 +48,6 @@ endpoint.
 
 #### Using a real backend
 
-Open `script.js` and search for `example.com/api/scores`. Replace the placeholder
-URL with the address of your server. Removing the calls to `postScoreOnline`
+Open `script.js` and change the value of the `SCORE_API` constant near the top of
+the file to the address of your server. Removing the calls to `postScoreOnline`
 will disable online score submission entirely.
