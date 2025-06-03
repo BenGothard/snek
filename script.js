@@ -15,7 +15,6 @@ const playerNameInput = document.getElementById('player-name');
 const leaderboardEl = document.getElementById('leaderboard');
 const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
-const difficultySelect = document.getElementById('difficulty');
 const themeSelect = document.getElementById('theme');
 const modeSelect = document.getElementById('mode');
 const aiSelect = document.getElementById('ai-behavior');
@@ -134,7 +133,7 @@ const difficultySettings = {
   medium: { frame: 120, obstacles: 5, minFrame: 60 },
   hard: { frame: 90, obstacles: 10, minFrame: 45 }
 };
-let currentDifficulty = 'medium';
+let currentDifficulty = 'easy';
 let frameDelay = difficultySettings[currentDifficulty].frame;
 const fastFrameDelay = 75; // ms when holding spacebar
 let fastMode = false;
@@ -266,6 +265,7 @@ function reset() {
   velocity = { x: 0, y: 0 };
   apples = [];
   obstacles = [];
+  currentDifficulty = 'easy';
   frameDelay = difficultySettings[currentDifficulty].frame;
   frameDelay = calcSpeed(snake.length, difficultySettings, currentDifficulty);
   for (let i = 0; i < appleCount; i++) {
@@ -310,6 +310,25 @@ function updateScore() {
   npcs.forEach((npc, i) => {
     npc.scoreEl.textContent = `NPC ${i + 1} Score: ${npc.score}`;
   });
+}
+
+function updateDifficulty() {
+  let newDiff = 'easy';
+  if (score >= 25) {
+    newDiff = 'hard';
+  } else if (score >= 10) {
+    newDiff = 'medium';
+  }
+  if (newDiff !== currentDifficulty) {
+    currentDifficulty = newDiff;
+    while (obstacles.length < difficultySettings[currentDifficulty].obstacles) {
+      const o = randomObstacle();
+      if (!o) break;
+      obstacles.push(o);
+    }
+    frameDelay = calcSpeed(snake.length, difficultySettings, currentDifficulty);
+    renderLeaderboard();
+  }
 }
 
 function removeNpc(npc) {
@@ -475,6 +494,7 @@ function step(timestamp) {
     if (head.x === a.x && head.y === a.y) {
       score += a.type === 'gold' ? 5 : 1;
       updateScore();
+      updateDifficulty();
       eatSound.currentTime = 0;
       eatSound.play();
         if (a.type === 'speed') {
@@ -682,11 +702,6 @@ window.addEventListener('keyup', e => {
   }
 });
 
-difficultySelect.addEventListener('change', () => {
-  currentDifficulty = difficultySelect.value;
-  if (!running) reset();
-  renderLeaderboard();
-});
 
 themeSelect.addEventListener('change', () => {
   currentTheme = themes[themeSelect.value] || themes.classic;
