@@ -22,7 +22,7 @@
       <button id="start">Start Game</button>
       <button id="pause">Pause</button>
       <div id="instructions">
-        Use the arrow keys or WASD to move. Hold the spacebar to speed up. Use the <strong>Pause</strong> button or press <kbd>p</kbd> to pause/resume.
+        Use the arrow keys or WASD to move. Hold the spacebar to speed up. Collect blue speed apples for a short boost. Use the <strong>Pause</strong> button or press <kbd>p</kbd> to pause/resume.
       </div>
       <div id="options">
         <label for="difficulty">Difficulty:</label>
@@ -37,8 +37,20 @@
           <option value="dark">Dark</option>
           <option value="neon">Neon</option>
         </select>
+        <label for="mode">Mode:</label>
+        <select id="mode">
+          <option value="normal" selected>Normal</option>
+          <option value="timed">Timed 60s</option>
+        </select>
+        <label for="ai-behavior">AI:</label>
+        <select id="ai-behavior">
+          <option value="aggressive" selected>Aggressive</option>
+          <option value="normal">Normal</option>
+          <option value="random">Random</option>
+        </select>
       </div>
       <p id="score">Score: 0</p>
+      <p id="timer" style="display:none">Time: 60</p>
       <div id="npc-scores"></div>
       <h2>Leaderboard</h2>
       <ol id="leaderboard"></ol>

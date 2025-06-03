@@ -12,6 +12,9 @@ const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const difficultySelect = document.getElementById('difficulty');
 const themeSelect = document.getElementById('theme');
+const modeSelect = document.getElementById('mode');
+const aiSelect = document.getElementById('ai-behavior');
+const timerEl = document.getElementById('timer');
 
 // Online score endpoint
 const SCORE_API = 'https://example.com/api/scores';
@@ -68,6 +71,10 @@ let currentDifficulty = 'medium';
 let frameDelay = difficultySettings[currentDifficulty].frame;
 const fastFrameDelay = 75; // ms when holding spacebar
 let fastMode = false;
+let speedBoost = 0;
+let currentMode = modeSelect.value;
+let timeRemaining = 0;
+let aiBehavior = aiSelect.value;
 
 const themes = {
   classic: {
@@ -76,6 +83,7 @@ const themes = {
     npc: 'orange',
     apple: 'red',
     gold: 'gold',
+    speed: 'cyan',
     obstacle: 'gray'
   },
   dark: {
@@ -84,6 +92,7 @@ const themes = {
     npc: '#fa0',
     apple: '#f55',
     gold: '#ff0',
+    speed: '#0ff',
     obstacle: '#666'
   },
   neon: {
@@ -92,6 +101,7 @@ const themes = {
     npc: '#ff8800',
     apple: '#f0f',
     gold: '#ff0',
+    speed: '#0ff',
     obstacle: '#0f0'
   }
 };
@@ -151,7 +161,8 @@ function renderLeaderboard() {
   leaderboardEl.innerHTML = '';
   list.forEach((s, i) => {
     const li = document.createElement('li');
-    li.textContent = `${i + 1}. ${s.name}: ${s.score}`;
+    const modeLabel = s.mode ? ` [${s.mode}]` : '';
+    li.textContent = `${i + 1}. ${s.name}${modeLabel}: ${s.score}`;
     leaderboardEl.appendChild(li);
   });
   if (onlineScores.length) {
@@ -221,6 +232,14 @@ function reset() {
   updateScore();
   canvas.style.background = currentTheme.bg;
   document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
+  speedBoost = 0;
+  if (currentMode === 'timed') {
+    timeRemaining = 60000;
+    timerEl.style.display = 'block';
+    timerEl.textContent = 'Time: 60';
+  } else {
+    timerEl.style.display = 'none';
+  }
 }
 
 function updateScore() {
@@ -246,7 +265,7 @@ function gameLoop(timestamp) {
     draw();
     requestAnimationFrame(gameLoop);
   } else {
-    addScore({ name: playerName || 'Anonymous', score });
+    addScore({ name: playerName || 'Anonymous', score, mode: currentMode });
     reset();
     gameOverEl.style.display = 'block';
     gameOverSound.currentTime = 0;
@@ -261,6 +280,48 @@ let lastTime = 0;
 function chooseNpcVelocity(npc) {
   if (!apples.length) return;
   const head = npc.snake[0];
+
+  function isBlocked(nx, ny) {
+    for (const part of snake) {
+      if (part.x === nx && part.y === ny) return true;
+    }
+    for (const part of npc.snake) {
+      if (part.x === nx && part.y === ny) return true;
+    }
+    for (const other of npcs) {
+      if (other === npc) continue;
+      for (const part of other.snake) {
+        if (part.x === nx && part.y === ny) return true;
+      }
+    }
+    for (const obs of obstacles) {
+      if (obs.x === nx && obs.y === ny) return true;
+    }
+    return false;
+  }
+
+  if (aiBehavior === 'random') {
+    const dirs = [
+      { x: 1, y: 0 },
+      { x: -1, y: 0 },
+      { x: 0, y: 1 },
+      { x: 0, y: -1 }
+    ];
+    for (let i = dirs.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [dirs[i], dirs[j]] = [dirs[j], dirs[i]];
+    }
+    for (const dir of dirs) {
+      const nx = (head.x + dir.x + tileCount) % tileCount;
+      const ny = (head.y + dir.y + tileCount) % tileCount;
+      if (!isBlocked(nx, ny)) {
+        npc.velocity = dir;
+        return;
+      }
+    }
+    return;
+  }
+
   const target = apples[0];
 
   function diff(a, b) {
@@ -280,42 +341,14 @@ function chooseNpcVelocity(npc) {
     { x: -primary[0].x, y: -primary[0].y },
     { x: -primary[1].x, y: -primary[1].y }
   ];
+  if (aiBehavior === 'normal' && Math.random() < 0.3) {
+    dirs.sort(() => Math.random() - 0.5);
+  }
 
   for (const dir of dirs) {
     const nx = (head.x + dir.x + tileCount) % tileCount;
     const ny = (head.y + dir.y + tileCount) % tileCount;
-    let blocked = false;
-    for (const part of snake) {
-      if (part.x === nx && part.y === ny) {
-        blocked = true;
-        break;
-      }
-    }
-    if (blocked) continue;
-    for (const part of npc.snake) {
-      if (part.x === nx && part.y === ny) {
-        blocked = true;
-        break;
-      }
-    }
-    if (blocked) continue;
-    for (const other of npcs) {
-      if (other === npc) continue;
-      for (const part of other.snake) {
-        if (part.x === nx && part.y === ny) {
-          blocked = true;
-          break;
-        }
-      }
-      if (blocked) break;
-    }
-    for (const obs of obstacles) {
-      if (obs.x === nx && obs.y === ny) {
-        blocked = true;
-        break;
-      }
-    }
-    if (!blocked) {
+    if (!isBlocked(nx, ny)) {
       npc.velocity = dir;
       return;
     }
@@ -323,9 +356,20 @@ function chooseNpcVelocity(npc) {
 }
 
 function step(timestamp) {
-  const delay = fastMode ? Math.min(fastFrameDelay, frameDelay) : frameDelay;
+  const boosted = fastMode || speedBoost > 0;
+  const delay = boosted ? Math.min(fastFrameDelay, frameDelay) : frameDelay;
   if (timestamp - lastTime < delay) return true;
+  const delta = timestamp - lastTime;
   lastTime = timestamp;
+  if (currentMode === 'timed') {
+    timeRemaining -= delta;
+    if (timeRemaining <= 0) {
+      timerEl.textContent = 'Time: 0';
+      return false;
+    }
+    timerEl.textContent = `Time: ${Math.ceil(timeRemaining / 1000)}`;
+  }
+  if (speedBoost > 0) speedBoost--;
 
   for (const npc of npcs) {
     chooseNpcVelocity(npc);
@@ -365,6 +409,9 @@ function step(timestamp) {
       updateScore();
       eatSound.currentTime = 0;
       eatSound.play();
+      if (a.type === 'speed') {
+        speedBoost = 40;
+      }
       growing += a.type === 'gold' ? 2 : 1;
       const newApple = randomApple(
         tileCount,
@@ -483,7 +530,13 @@ function draw() {
   }
 
   for (let a of apples) {
-    ctx.fillStyle = a.type === 'gold' ? currentTheme.gold : currentTheme.apple;
+    if (a.type === 'gold') {
+      ctx.fillStyle = currentTheme.gold;
+    } else if (a.type === 'speed') {
+      ctx.fillStyle = currentTheme.speed;
+    } else {
+      ctx.fillStyle = currentTheme.apple;
+    }
     ctx.fillRect(a.x * gridSize, a.y * gridSize, gridSize - 1, gridSize - 1);
   }
 
@@ -557,6 +610,18 @@ themeSelect.addEventListener('change', () => {
   if (!running) draw();
 });
 
+modeSelect.addEventListener('change', () => {
+  if (!running) {
+    currentMode = modeSelect.value;
+    timerEl.style.display = currentMode === 'timed' ? 'block' : 'none';
+    timerEl.textContent = 'Time: 60';
+  }
+});
+
+aiSelect.addEventListener('change', () => {
+  aiBehavior = aiSelect.value;
+});
+
 reset();
 renderLeaderboard();
 loadOnlineLeaderboard();
@@ -569,6 +634,15 @@ startButton.addEventListener('click', () => {
   gameOverEl.style.display = 'none';
   paused = false;
   pausedEl.style.display = 'none';
+  currentMode = modeSelect.value;
+  aiBehavior = aiSelect.value;
+  if (currentMode === 'timed') {
+    timeRemaining = 60000;
+    timerEl.style.display = 'block';
+    timerEl.textContent = 'Time: 60';
+  } else {
+    timerEl.style.display = 'none';
+  }
   running = true;
   lastTime = 0;
   requestAnimationFrame(gameLoop);

@@ -16,13 +16,13 @@ test('randomApple returns non-colliding position', () => {
   const snake = [{ x: 0, y: 0 }];
   const apples = [{ x: 1, y: 1 }];
   const obstacles = [{ x: 2, y: 2 }];
-  const values = [0,0, 0.2,0.2, 0.4,0.4, 0.6,0.6, 0.5];
+  const values = [0,0, 0.2,0.2, 0.4,0.4, 0.6,0.6, 0.02];
   let i = 0;
   const rng = () => values[i++];
   const apple = randomApple(5, snake, apples, obstacles, rng);
   strictEqual(apple.x, 3);
   strictEqual(apple.y, 3);
-  strictEqual(apple.type, 'normal');
+  strictEqual(apple.type, 'speed');
   ok(!isOccupied(apple.x, apple.y, snake, apples, obstacles));
 });
 

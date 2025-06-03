@@ -15,11 +15,15 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 ### Features
 
 - Gold apples worth extra points appear occasionally.
+- Speed apples give a temporary speed boost.
 - Difficulty levels adjust speed and add obstacles.
+- Optional timed mode challenges you to score in 60 seconds.
 - Choose from multiple visual themes.
 - Leaderboards are stored per difficulty and include player names.
+- Leaderboard entries show which mode was used.
 - The theme defaults to dark when your system prefers it.
 - Battle against multiple AI-controlled snakes.
+- Select different AI behaviors for computer-controlled snakes.
 - The AI snakes can eliminate each other for a free-for-all battle.
 
 Enjoy!
