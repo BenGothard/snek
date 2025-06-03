@@ -17,6 +17,7 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 - Gold apples worth extra points appear occasionally.
 - Speed apples give a temporary speed boost.
 - Ghost apples let you pass through obstacles briefly.
+- Additional apples appear at random while playing.
 - Difficulty levels adjust speed and add obstacles.
 - Optional timed mode challenges you to score in 60 seconds.
 - Choose from multiple visual themes.

@@ -41,6 +41,8 @@ const appleCount = 3;
 const NPC_COUNT = 3;
 const NPC_SPAWN_MIN = 2000; // minimum respawn delay in ms
 const NPC_SPAWN_MAX = 5000; // maximum respawn delay in ms
+const APPLE_SPAWN_MIN = 4000; // minimum new apple delay in ms
+const APPLE_SPAWN_MAX = 7000; // maximum new apple delay in ms
 
 function randomObstacle() {
   const maxAttempts = 100;
@@ -100,6 +102,24 @@ function scheduleNpcSpawn() {
   setTimeout(() => {
     if (!running) return;
     spawnNpc();
+  }, delay);
+}
+
+function scheduleAppleSpawn() {
+  const delay =
+    APPLE_SPAWN_MIN + Math.random() * (APPLE_SPAWN_MAX - APPLE_SPAWN_MIN);
+  setTimeout(() => {
+    if (!running) return;
+    const a = randomApple(
+      tileCount,
+      snake.concat(getAllNpcParts()),
+      apples,
+      obstacles
+    );
+    if (a) {
+      apples.push(a);
+    }
+    scheduleAppleSpawn();
   }, delay);
 }
 let apples = [];
@@ -709,6 +729,7 @@ startButton.addEventListener('click', () => {
     timerEl.style.display = 'none';
   }
   running = true;
+  scheduleAppleSpawn();
   lastTime = 0;
   requestAnimationFrame(gameLoop);
 });
