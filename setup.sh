@@ -14,4 +14,11 @@ fi
 # Install project dependencies locally
 npm install
 
+echo "Running npm audit to check for vulnerabilities..."
+if npm audit > audit.log; then
+    echo "Audit complete. Results saved to audit.log."
+else
+    echo "npm audit failed, possibly due to lack of network connectivity."
+fi
+
 echo "Setup complete. Use 'npm run serve' to run the game locally."

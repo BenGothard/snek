@@ -34,8 +34,9 @@ sudo apt-get update && sudo apt-get install -y nodejs npm
 ```
 
 Once Node.js is available, run `./setup.sh` to install the project
-dependencies. After running the script you can start a local web server
-with:
+dependencies and perform an `npm audit` while network access is still
+available. The audit results are saved to `audit.log`. After running the
+script you can start a local web server with:
 
 ```bash
 npm run serve
