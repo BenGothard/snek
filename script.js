@@ -10,6 +10,9 @@ const pausedEl = document.getElementById('paused');
 const difficultySelect = document.getElementById('difficulty');
 const themeSelect = document.getElementById('theme');
 
+// Online score endpoint
+const SCORE_API = 'https://example.com/api/scores';
+
 // Sound effects
 const eatSound = new Audio('assets/eat.mp3');
 const gameOverSound = new Audio('assets/gameover.mp3');
@@ -94,7 +97,7 @@ let playerName = '';
 
 async function loadOnlineLeaderboard() {
   try {
-    const res = await fetch('https://example.com/api/scores');
+    const res = await fetch(SCORE_API);
     if (res.ok) {
       const data = await res.json();
       onlineScores = data.scores || [];
@@ -106,7 +109,7 @@ async function loadOnlineLeaderboard() {
 
 async function postScoreOnline(scoreData) {
   try {
-    await fetch('https://example.com/api/scores', {
+    await fetch(SCORE_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(scoreData)
