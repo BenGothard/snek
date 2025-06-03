@@ -16,8 +16,6 @@ const leaderboardEl = document.getElementById('leaderboard');
 const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
-const modeSelect = document.getElementById('mode');
-const timerEl = document.getElementById('timer');
 
 // Online score endpoint
 const SCORE_API = 'https://example.com/api/scores';
@@ -152,8 +150,6 @@ const fastFrameDelay = 75; // ms when holding spacebar
 let fastMode = false;
 let speedBoost = 0;
 let ghostMode = 0;
-let currentMode = modeSelect.value;
-let timeRemaining = 0;
 let aiBehavior = 'random';
 
 const themes = {
@@ -244,8 +240,7 @@ function renderLeaderboard() {
   leaderboardEl.innerHTML = '';
   list.forEach((s, i) => {
     const li = document.createElement('li');
-    const modeLabel = s.mode ? ` [${s.mode}]` : '';
-    li.textContent = `${i + 1}. ${s.name}${modeLabel}: ${s.score}`;
+    li.textContent = `${i + 1}. ${s.name}: ${s.score}`;
     leaderboardEl.appendChild(li);
   });
   if (onlineScores.length) {
@@ -309,13 +304,6 @@ function reset() {
   document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
   speedBoost = 0;
   ghostMode = 0;
-  if (currentMode === 'timed') {
-    timeRemaining = 60000;
-    timerEl.style.display = 'block';
-    timerEl.textContent = 'Time: 60';
-  } else {
-    timerEl.style.display = 'none';
-  }
 }
 
 function updateScore() {
@@ -362,7 +350,7 @@ function gameLoop(timestamp) {
     draw();
     requestAnimationFrame(gameLoop);
   } else {
-    addScore({ name: playerName || 'Anonymous', score, mode: currentMode });
+    addScore({ name: playerName || 'Anonymous', score });
     reset();
     gameOverEl.style.display = 'block';
     gameOverSound.currentTime = 0;
@@ -458,14 +446,6 @@ function step(timestamp) {
   if (timestamp - lastTime < delay) return true;
   const delta = timestamp - lastTime;
   lastTime = timestamp;
-  if (currentMode === 'timed') {
-    timeRemaining -= delta;
-    if (timeRemaining <= 0) {
-      timerEl.textContent = 'Time: 0';
-      return false;
-    }
-    timerEl.textContent = `Time: ${Math.ceil(timeRemaining / 1000)}`;
-  }
   if (speedBoost > 0) speedBoost--;
   if (ghostMode > 0) ghostMode--;
 
@@ -723,13 +703,6 @@ themeSelect.addEventListener('change', () => {
   if (!running) draw();
 });
 
-modeSelect.addEventListener('change', () => {
-  if (!running) {
-    currentMode = modeSelect.value;
-    timerEl.style.display = currentMode === 'timed' ? 'block' : 'none';
-    timerEl.textContent = 'Time: 60';
-  }
-});
 
 
 reset();
@@ -744,14 +717,6 @@ startButton.addEventListener('click', () => {
   gameOverEl.style.display = 'none';
   paused = false;
   pausedEl.style.display = 'none';
-  currentMode = modeSelect.value;
-  if (currentMode === 'timed') {
-    timeRemaining = 60000;
-    timerEl.style.display = 'block';
-    timerEl.textContent = 'Time: 60';
-  } else {
-    timerEl.style.display = 'none';
-  }
   running = true;
   scheduleAppleSpawn();
   lastTime = 0;
