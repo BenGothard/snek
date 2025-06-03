@@ -31,11 +31,25 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
   themeSelect.value = 'dark';
 }
 
-// Reduce the size of each tile so more of them fit on the
-// canvas. This effectively "zooms out" the board without
-// increasing the canvas size.
-const gridSize = 10;
-const tileCount = canvas.width / gridSize;
+// Number of tiles on each axis of the board. The actual
+// pixel size of each tile is calculated based on the canvas
+// dimensions so the board can scale with the window size.
+const tileCount = 48;
+let gridSize;
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  gridSize = canvas.width / tileCount;
+}
+
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  if (!running) draw();
+});
+
+resizeCanvas();
 const appleCount = 3;
 const NPC_COUNT = 3;
 const NPC_SPAWN_MIN = 2000; // minimum respawn delay in ms
