@@ -123,6 +123,43 @@ h1 {
   margin: 0 auto;
 }
 
+#touch-controls {
+  display: grid;
+  grid-template-columns: repeat(3, 60px);
+  grid-template-rows: repeat(3, 60px);
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+#btn-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+#btn-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+#btn-down {
+  grid-column: 2;
+  grid-row: 2;
+}
+#btn-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+#btn-pause {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+@media (min-width: 800px) {
+  #touch-controls {
+    display: none;
+  }
+}
+
 @media (min-width: 800px) {
   #layout {
     flex-direction: row;
