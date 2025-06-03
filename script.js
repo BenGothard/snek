@@ -114,6 +114,7 @@ let frameDelay = difficultySettings[currentDifficulty].frame;
 const fastFrameDelay = 75; // ms when holding spacebar
 let fastMode = false;
 let speedBoost = 0;
+let ghostMode = 0;
 let currentMode = modeSelect.value;
 let timeRemaining = 0;
 let aiBehavior = aiSelect.value;
@@ -126,6 +127,7 @@ const themes = {
     apple: 'red',
     gold: 'gold',
     speed: 'cyan',
+    ghost: 'purple',
     obstacle: 'gray'
   },
   dark: {
@@ -135,6 +137,7 @@ const themes = {
     apple: '#f55',
     gold: '#ff0',
     speed: '#0ff',
+    ghost: '#f6f',
     obstacle: '#666'
   },
   neon: {
@@ -144,6 +147,7 @@ const themes = {
     apple: '#f0f',
     gold: '#ff0',
     speed: '#0ff',
+    ghost: '#fff',
     obstacle: '#0f0'
   }
 };
@@ -266,6 +270,7 @@ function reset() {
   canvas.style.background = currentTheme.bg;
   document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
   speedBoost = 0;
+  ghostMode = 0;
   if (currentMode === 'timed') {
     timeRemaining = 60000;
     timerEl.style.display = 'block';
@@ -405,6 +410,7 @@ function step(timestamp) {
     timerEl.textContent = `Time: ${Math.ceil(timeRemaining / 1000)}`;
   }
   if (speedBoost > 0) speedBoost--;
+  if (ghostMode > 0) ghostMode--;
 
   for (const npc of npcs) {
     chooseNpcVelocity(npc);
@@ -416,22 +422,24 @@ function step(timestamp) {
   head.x = (head.x + tileCount) % tileCount;
   head.y = (head.y + tileCount) % tileCount;
 
-  // check collision with self
-  for (let part of snake) {
-    if (part.x === head.x && part.y === head.y) {
-      return false;
-    }
-  }
-  for (const npc of npcs) {
-    for (let part of npc.snake) {
+  if (ghostMode === 0) {
+    // check collision with self
+    for (let part of snake) {
       if (part.x === head.x && part.y === head.y) {
         return false;
       }
     }
-  }
-  for (let obs of obstacles) {
-    if (obs.x === head.x && obs.y === head.y) {
-      return false;
+    for (const npc of npcs) {
+      for (let part of npc.snake) {
+        if (part.x === head.x && part.y === head.y) {
+          return false;
+        }
+      }
+    }
+    for (let obs of obstacles) {
+      if (obs.x === head.x && obs.y === head.y) {
+        return false;
+      }
     }
   }
 
@@ -444,9 +452,11 @@ function step(timestamp) {
       updateScore();
       eatSound.currentTime = 0;
       eatSound.play();
-      if (a.type === 'speed') {
-        speedBoost = 40;
-      }
+        if (a.type === 'speed') {
+          speedBoost = 40;
+        } else if (a.type === 'ghost') {
+          ghostMode = 40;
+        }
       growing += a.type === 'gold' ? 2 : 1;
       const newApple = randomApple(
         tileCount,
@@ -476,7 +486,7 @@ function step(timestamp) {
     npcHead.y = (npcHead.y + tileCount) % tileCount;
 
     for (let part of snake) {
-      if (part.x === npcHead.x && part.y === npcHead.y) {
+      if (part.x === npcHead.x && part.y === npcHead.y && ghostMode === 0) {
         return false;
       }
     }
@@ -569,6 +579,8 @@ function draw() {
       ctx.fillStyle = currentTheme.gold;
     } else if (a.type === 'speed') {
       ctx.fillStyle = currentTheme.speed;
+    } else if (a.type === 'ghost') {
+      ctx.fillStyle = currentTheme.ghost;
     } else {
       ctx.fillStyle = currentTheme.apple;
     }

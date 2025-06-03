@@ -26,6 +26,17 @@ test('randomApple returns non-colliding position', () => {
   ok(!isOccupied(apple.x, apple.y, snake, apples, obstacles));
 });
 
+test('randomApple can generate ghost apples', () => {
+  const snake = [{ x: 0, y: 0 }];
+  const apples = [{ x: 1, y: 1 }];
+  const obstacles = [{ x: 2, y: 2 }];
+  const values = [0,0, 0.2,0.2, 0.4,0.4, 0.6,0.6, 0.12];
+  let i = 0;
+  const rng = () => values[i++];
+  const apple = randomApple(5, snake, apples, obstacles, rng);
+  strictEqual(apple.type, 'ghost');
+});
+
 test('updateSpeed adjusts delay based on length', () => {
   const settings = {
     easy: { frame: 150, obstacles: 0, minFrame: 80 },

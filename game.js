@@ -27,6 +27,8 @@ export function randomApple(tileCount, snake = [], apples = [], obstacles = [], 
         type = 'speed';
       } else if (r < 0.1) {
         type = 'gold';
+      } else if (r < 0.15) {
+        type = 'ghost';
       }
       return { x: pos.x, y: pos.y, type };
     }
