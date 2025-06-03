@@ -25,7 +25,7 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 - Leaderboard entries show which mode was used.
 - The theme defaults to dark when your system prefers it.
 - Battle against multiple AI-controlled snakes.
-- Select different AI behaviors for computer-controlled snakes.
+- AI-controlled snakes move randomly.
 - The AI snakes can eliminate each other for a free-for-all battle.
 - AI snakes spawn at random locations for a new challenge each game.
 

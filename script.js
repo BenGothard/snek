@@ -17,7 +17,6 @@ const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
 const modeSelect = document.getElementById('mode');
-const aiSelect = document.getElementById('ai-behavior');
 const timerEl = document.getElementById('timer');
 
 // Online score endpoint
@@ -155,7 +154,7 @@ let speedBoost = 0;
 let ghostMode = 0;
 let currentMode = modeSelect.value;
 let timeRemaining = 0;
-let aiBehavior = aiSelect.value;
+let aiBehavior = 'random';
 
 const themes = {
   classic: {
@@ -732,9 +731,6 @@ modeSelect.addEventListener('change', () => {
   }
 });
 
-aiSelect.addEventListener('change', () => {
-  aiBehavior = aiSelect.value;
-});
 
 reset();
 renderLeaderboard();
@@ -749,7 +745,6 @@ startButton.addEventListener('click', () => {
   paused = false;
   pausedEl.style.display = 'none';
   currentMode = modeSelect.value;
-  aiBehavior = aiSelect.value;
   if (currentMode === 'timed') {
     timeRemaining = 60000;
     timerEl.style.display = 'block';
