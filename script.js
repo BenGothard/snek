@@ -24,7 +24,10 @@ if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').match
   themeSelect.value = 'dark';
 }
 
-const gridSize = 20;
+// Reduce the size of each tile so more of them fit on the
+// canvas. This effectively "zooms out" the board without
+// increasing the canvas size.
+const gridSize = 10;
 const tileCount = canvas.width / gridSize;
 const appleCount = 3;
 const NPC_COUNT = 3;
