@@ -3,6 +3,7 @@ import { isOccupied, randomApple, updateSpeed as calcSpeed } from './game.js';
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
+const npcScoreEl = document.getElementById('npc-score');
 const startButton = document.getElementById('start');
 const pauseButton = document.getElementById('pause');
 const playerNameInput = document.getElementById('player-name');
@@ -34,7 +35,7 @@ function randomObstacle() {
       x: Math.floor(Math.random() * tileCount),
       y: Math.floor(Math.random() * tileCount)
     };
-    if (!isOccupied(pos.x, pos.y, snake, apples, obstacles)) {
+    if (!isOccupied(pos.x, pos.y, snake.concat(npcSnake), apples, obstacles)) {
       return pos;
     }
   }
@@ -43,10 +44,14 @@ function randomObstacle() {
 
 let snake = [{ x: 10, y: 10 }];
 let velocity = { x: 0, y: 0 };
+let npcSnake = [{ x: tileCount - 10, y: tileCount - 10 }];
+let npcVelocity = { x: 0, y: 0 };
 let apples = [];
 let obstacles = [];
 let growing = 0;
+let npcGrowing = 0;
 let score = 0;
+let npcScore = 0;
 let running = false;
 let paused = false;
 
@@ -61,9 +66,30 @@ const fastFrameDelay = 75; // ms when holding spacebar
 let fastMode = false;
 
 const themes = {
-  classic: { bg: '#222', snake: 'lime', apple: 'red', gold: 'gold', obstacle: 'gray' },
-  dark: { bg: '#111', snake: '#0f0', apple: '#f55', gold: '#ff0', obstacle: '#666' },
-  neon: { bg: '#000', snake: '#0ff', apple: '#f0f', gold: '#ff0', obstacle: '#0f0' }
+  classic: {
+    bg: '#222',
+    snake: 'lime',
+    npc: 'orange',
+    apple: 'red',
+    gold: 'gold',
+    obstacle: 'gray'
+  },
+  dark: {
+    bg: '#111',
+    snake: '#0f0',
+    npc: '#fa0',
+    apple: '#f55',
+    gold: '#ff0',
+    obstacle: '#666'
+  },
+  neon: {
+    bg: '#000',
+    snake: '#0ff',
+    npc: '#ff8800',
+    apple: '#f0f',
+    gold: '#ff0',
+    obstacle: '#0f0'
+  }
 };
 let currentTheme = themes[themeSelect.value] || themes.classic;
 document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
@@ -152,12 +178,14 @@ function addScore(newScore) {
 function reset() {
   snake = [{ x: 10, y: 10 }];
   velocity = { x: 0, y: 0 };
+  npcSnake = [{ x: tileCount - 10, y: tileCount - 10 }];
+  npcVelocity = { x: 0, y: 0 };
   apples = [];
   obstacles = [];
   frameDelay = difficultySettings[currentDifficulty].frame;
   frameDelay = calcSpeed(snake.length, difficultySettings, currentDifficulty);
   for (let i = 0; i < appleCount; i++) {
-    const a = randomApple(tileCount, snake, apples, obstacles);
+    const a = randomApple(tileCount, snake.concat(npcSnake), apples, obstacles);
     if (a) {
       apples.push(a);
     } else {
@@ -173,7 +201,9 @@ function reset() {
     }
   }
   growing = 0;
+  npcGrowing = 0;
   score = 0;
+  npcScore = 0;
   updateScore();
   canvas.style.background = currentTheme.bg;
   document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
@@ -181,6 +211,7 @@ function reset() {
 
 function updateScore() {
   scoreEl.textContent = `Score: ${score}`;
+  npcScoreEl.textContent = `NPC Score: ${npcScore}`;
 }
 
 
@@ -206,10 +237,66 @@ function gameLoop(timestamp) {
 
 let lastTime = 0;
 
+function chooseNpcVelocity() {
+  if (!apples.length) return;
+  const head = npcSnake[0];
+  const target = apples[0];
+
+  function diff(a, b) {
+    let d = (b - a + tileCount) % tileCount;
+    if (d > tileCount / 2) d -= tileCount;
+    return d;
+  }
+
+  const dx = diff(head.x, target.x);
+  const dy = diff(head.y, target.y);
+
+  const primary = Math.abs(dx) > Math.abs(dy)
+    ? [{ x: Math.sign(dx), y: 0 }, { x: 0, y: Math.sign(dy) }]
+    : [{ x: 0, y: Math.sign(dy) }, { x: Math.sign(dx), y: 0 }];
+  const dirs = [
+    ...primary,
+    { x: -primary[0].x, y: -primary[0].y },
+    { x: -primary[1].x, y: -primary[1].y }
+  ];
+
+  for (const dir of dirs) {
+    const nx = (head.x + dir.x + tileCount) % tileCount;
+    const ny = (head.y + dir.y + tileCount) % tileCount;
+    let blocked = false;
+    for (const part of snake) {
+      if (part.x === nx && part.y === ny) {
+        blocked = true;
+        break;
+      }
+    }
+    if (blocked) continue;
+    for (const part of npcSnake) {
+      if (part.x === nx && part.y === ny) {
+        blocked = true;
+        break;
+      }
+    }
+    if (blocked) continue;
+    for (const obs of obstacles) {
+      if (obs.x === nx && obs.y === ny) {
+        blocked = true;
+        break;
+      }
+    }
+    if (!blocked) {
+      npcVelocity = dir;
+      return;
+    }
+  }
+}
+
 function step(timestamp) {
   const delay = fastMode ? Math.min(fastFrameDelay, frameDelay) : frameDelay;
   if (timestamp - lastTime < delay) return true;
   lastTime = timestamp;
+
+  chooseNpcVelocity();
 
   const head = { x: snake[0].x + velocity.x, y: snake[0].y + velocity.y };
 
@@ -219,6 +306,11 @@ function step(timestamp) {
 
   // check collision with self
   for (let part of snake) {
+    if (part.x === head.x && part.y === head.y) {
+      return false;
+    }
+  }
+  for (let part of npcSnake) {
     if (part.x === head.x && part.y === head.y) {
       return false;
     }
@@ -239,7 +331,12 @@ function step(timestamp) {
       eatSound.currentTime = 0;
       eatSound.play();
       growing += a.type === 'gold' ? 2 : 1;
-      const newApple = randomApple(tileCount, snake, apples, obstacles);
+      const newApple = randomApple(
+        tileCount,
+        snake.concat(npcSnake),
+        apples,
+        obstacles
+      );
       if (newApple) {
         apples[i] = newApple;
       } else {
@@ -256,6 +353,64 @@ function step(timestamp) {
     snake.pop();
   }
 
+  const npcHead = { x: npcSnake[0].x + npcVelocity.x, y: npcSnake[0].y + npcVelocity.y };
+  npcHead.x = (npcHead.x + tileCount) % tileCount;
+  npcHead.y = (npcHead.y + tileCount) % tileCount;
+
+  for (let part of snake) {
+    if (part.x === npcHead.x && part.y === npcHead.y) {
+      return false;
+    }
+  }
+  for (let obs of obstacles) {
+    if (obs.x === npcHead.x && obs.y === npcHead.y) {
+      npcVelocity = { x: 0, y: 0 };
+      npcHead.x = npcSnake[0].x;
+      npcHead.y = npcSnake[0].y;
+      break;
+    }
+  }
+  for (let part of npcSnake) {
+    if (part.x === npcHead.x && part.y === npcHead.y) {
+      npcVelocity = { x: 0, y: 0 };
+      npcHead.x = npcSnake[0].x;
+      npcHead.y = npcSnake[0].y;
+      break;
+    }
+  }
+
+  npcSnake.unshift({ x: npcHead.x, y: npcHead.y });
+
+  for (let i = 0; i < apples.length; i++) {
+    const a = apples[i];
+    if (npcHead.x === a.x && npcHead.y === a.y) {
+      npcScore += a.type === 'gold' ? 5 : 1;
+      updateScore();
+      eatSound.currentTime = 0;
+      eatSound.play();
+      npcGrowing += a.type === 'gold' ? 2 : 1;
+      const newApple = randomApple(
+        tileCount,
+        snake.concat(npcSnake),
+        apples,
+        obstacles
+      );
+      if (newApple) {
+        apples[i] = newApple;
+      } else {
+        apples.splice(i, 1);
+        i--;
+      }
+      break;
+    }
+  }
+
+  if (npcGrowing > 0) {
+    npcGrowing--;
+  } else {
+    npcSnake.pop();
+  }
+
   return true;
 }
 
@@ -265,6 +420,11 @@ function draw() {
 
   ctx.fillStyle = currentTheme.snake;
   for (let part of snake) {
+    ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 1, gridSize - 1);
+  }
+
+  ctx.fillStyle = currentTheme.npc;
+  for (let part of npcSnake) {
     ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 1, gridSize - 1);
   }
 
