@@ -49,6 +49,20 @@ function randomObstacle() {
   return null;
 }
 
+function randomNpcStart() {
+  const maxAttempts = 100;
+  for (let attempts = 0; attempts < maxAttempts; attempts++) {
+    const pos = {
+      x: Math.floor(Math.random() * tileCount),
+      y: Math.floor(Math.random() * tileCount)
+    };
+    if (!isOccupied(pos.x, pos.y, snake.concat(getAllNpcParts()), apples, obstacles)) {
+      return pos;
+    }
+  }
+  return null;
+}
+
 let snake = [{ x: 10, y: 10 }];
 let velocity = { x: 0, y: 0 };
 let npcs = [];
@@ -218,8 +232,9 @@ function reset() {
   npcs = [];
   npcScoresEl.innerHTML = '';
   for (let i = 0; i < NPC_COUNT; i++) {
+    const startPos = randomNpcStart() || { x: tileCount - 10 - i, y: tileCount - 10 };
     const npc = {
-      snake: [{ x: tileCount - 10 - i, y: tileCount - 10 }],
+      snake: [startPos],
       velocity: { x: 0, y: 0 },
       growing: 0,
       score: 0,

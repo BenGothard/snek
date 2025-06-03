@@ -25,6 +25,7 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 - Battle against multiple AI-controlled snakes.
 - Select different AI behaviors for computer-controlled snakes.
 - The AI snakes can eliminate each other for a free-for-all battle.
+- AI snakes spawn at random locations for a new challenge each game.
 
 Enjoy!
 
