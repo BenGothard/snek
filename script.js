@@ -39,29 +39,35 @@ function isOccupied(x, y) {
 }
 
 function randomApple() {
-  let pos;
-  do {
-    pos = {
+  const maxAttempts = 100;
+  for (let attempts = 0; attempts < maxAttempts; attempts++) {
+    const pos = {
       x: Math.floor(Math.random() * tileCount),
       y: Math.floor(Math.random() * tileCount)
     };
-  } while (isOccupied(pos.x, pos.y));
-  return {
-    x: pos.x,
-    y: pos.y,
-    type: Math.random() < 0.1 ? 'gold' : 'normal'
-  };
+    if (!isOccupied(pos.x, pos.y)) {
+      return {
+        x: pos.x,
+        y: pos.y,
+        type: Math.random() < 0.1 ? 'gold' : 'normal'
+      };
+    }
+  }
+  return null;
 }
 
 function randomObstacle() {
-  let pos;
-  do {
-    pos = {
+  const maxAttempts = 100;
+  for (let attempts = 0; attempts < maxAttempts; attempts++) {
+    const pos = {
       x: Math.floor(Math.random() * tileCount),
       y: Math.floor(Math.random() * tileCount)
     };
-  } while (isOccupied(pos.x, pos.y));
-  return pos;
+    if (!isOccupied(pos.x, pos.y)) {
+      return pos;
+    }
+  }
+  return null;
 }
 
 let snake = [{ x: 10, y: 10 }];
@@ -180,10 +186,20 @@ function reset() {
   frameDelay = difficultySettings[currentDifficulty].frame;
   updateSpeed();
   for (let i = 0; i < appleCount; i++) {
-    apples.push(randomApple());
+    const a = randomApple();
+    if (a) {
+      apples.push(a);
+    } else {
+      break;
+    }
   }
   for (let i = 0; i < difficultySettings[currentDifficulty].obstacles; i++) {
-    obstacles.push(randomObstacle());
+    const o = randomObstacle();
+    if (o) {
+      obstacles.push(o);
+    } else {
+      break;
+    }
   }
   growing = 0;
   score = 0;
@@ -258,7 +274,13 @@ function step(timestamp) {
       eatSound.currentTime = 0;
       eatSound.play();
       growing += a.type === 'gold' ? 2 : 1;
-      apples[i] = randomApple();
+      const newApple = randomApple();
+      if (newApple) {
+        apples[i] = newApple;
+      } else {
+        apples.splice(i, 1);
+        i--;
+      }
       updateSpeed();
     }
   }
