@@ -230,6 +230,11 @@ function updateScore() {
   });
 }
 
+function removeNpc(npc) {
+  npc.scoreEl.remove();
+  npcs = npcs.filter(n => n !== npc);
+}
+
 
 function gameLoop(timestamp) {
   if (!running) return;
@@ -383,7 +388,7 @@ function step(timestamp) {
     snake.pop();
   }
 
-  for (const npc of npcs) {
+  for (const npc of npcs.slice()) {
     const npcHead = { x: npc.snake[0].x + npc.velocity.x, y: npc.snake[0].y + npc.velocity.y };
     npcHead.x = (npcHead.x + tileCount) % tileCount;
     npcHead.y = (npcHead.y + tileCount) % tileCount;
@@ -393,32 +398,36 @@ function step(timestamp) {
         return false;
       }
     }
+    let dead = false;
     for (const other of npcs) {
       if (other === npc) continue;
       for (let part of other.snake) {
         if (part.x === npcHead.x && part.y === npcHead.y) {
-          npc.velocity = { x: 0, y: 0 };
-          npcHead.x = npc.snake[0].x;
-          npcHead.y = npc.snake[0].y;
+          dead = true;
+          break;
+        }
+      }
+      if (dead) break;
+    }
+    if (!dead) {
+      for (let obs of obstacles) {
+        if (obs.x === npcHead.x && obs.y === npcHead.y) {
+          dead = true;
           break;
         }
       }
     }
-    for (let obs of obstacles) {
-      if (obs.x === npcHead.x && obs.y === npcHead.y) {
-        npc.velocity = { x: 0, y: 0 };
-        npcHead.x = npc.snake[0].x;
-        npcHead.y = npc.snake[0].y;
-        break;
+    if (!dead) {
+      for (let part of npc.snake) {
+        if (part.x === npcHead.x && part.y === npcHead.y) {
+          dead = true;
+          break;
+        }
       }
     }
-    for (let part of npc.snake) {
-      if (part.x === npcHead.x && part.y === npcHead.y) {
-        npc.velocity = { x: 0, y: 0 };
-        npcHead.x = npc.snake[0].x;
-        npcHead.y = npc.snake[0].y;
-        break;
-      }
+    if (dead) {
+      removeNpc(npc);
+      continue;
     }
 
     npc.snake.unshift({ x: npcHead.x, y: npcHead.y });
