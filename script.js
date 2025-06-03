@@ -6,6 +6,11 @@ const scoreEl = document.getElementById('score');
 const npcScoresEl = document.getElementById('npc-scores');
 const startButton = document.getElementById('start');
 const pauseButton = document.getElementById('pause');
+const upBtn = document.getElementById('btn-up');
+const downBtn = document.getElementById('btn-down');
+const leftBtn = document.getElementById('btn-left');
+const rightBtn = document.getElementById('btn-right');
+const pauseTouchBtn = document.getElementById('btn-pause');
 const playerNameInput = document.getElementById('player-name');
 const leaderboardEl = document.getElementById('leaderboard');
 const gameOverEl = document.getElementById('game-over');
@@ -593,6 +598,23 @@ function draw() {
   }
 }
 
+function setDirection(dir) {
+  switch (dir) {
+    case 'up':
+      if (velocity.y !== 1) velocity = { x: 0, y: -1 };
+      break;
+    case 'down':
+      if (velocity.y !== -1) velocity = { x: 0, y: 1 };
+      break;
+    case 'left':
+      if (velocity.x !== 1) velocity = { x: -1, y: 0 };
+      break;
+    case 'right':
+      if (velocity.x !== -1) velocity = { x: 1, y: 0 };
+      break;
+  }
+}
+
 window.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
   if (
@@ -607,23 +629,19 @@ window.addEventListener('keydown', e => {
   switch (key) {
     case 'arrowup':
     case 'w':
-      if (velocity.y === 1) break;
-      velocity = { x: 0, y: -1 };
+      setDirection('up');
       break;
     case 'arrowdown':
     case 's':
-      if (velocity.y === -1) break;
-      velocity = { x: 0, y: 1 };
+      setDirection('down');
       break;
     case 'arrowleft':
     case 'a':
-      if (velocity.x === 1) break;
-      velocity = { x: -1, y: 0 };
+      setDirection('left');
       break;
     case 'arrowright':
     case 'd':
-      if (velocity.x === -1) break;
-      velocity = { x: 1, y: 0 };
+      setDirection('right');
       break;
     case ' ': // spacebar
       fastMode = true;
@@ -703,3 +721,31 @@ pauseButton.addEventListener('click', () => {
     requestAnimationFrame(gameLoop);
   }
 });
+
+function attachTouch(el, dir) {
+  el.addEventListener('touchstart', e => {
+    e.preventDefault();
+    setDirection(dir);
+  });
+  el.addEventListener('touchend', e => e.preventDefault());
+}
+
+if (upBtn) {
+  attachTouch(upBtn, 'up');
+  attachTouch(downBtn, 'down');
+  attachTouch(leftBtn, 'left');
+  attachTouch(rightBtn, 'right');
+}
+
+if (pauseTouchBtn) {
+  pauseTouchBtn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (!running) return;
+    paused = !paused;
+    pausedEl.style.display = paused ? 'block' : 'none';
+    if (!paused) {
+      requestAnimationFrame(gameLoop);
+    }
+  });
+  pauseTouchBtn.addEventListener('touchend', e => e.preventDefault());
+}
