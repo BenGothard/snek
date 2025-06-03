@@ -150,7 +150,7 @@ const fastFrameDelay = 75; // ms when holding spacebar
 let fastMode = false;
 let speedBoost = 0;
 let ghostMode = 0;
-let aiBehavior = 'random';
+let aiBehavior = 'aggressive';
 
 const themes = {
   classic: {
@@ -407,13 +407,29 @@ function chooseNpcVelocity(npc) {
     return;
   }
 
-  const target = apples[0];
-
   function diff(a, b) {
     let d = (b - a + tileCount) % tileCount;
     if (d > tileCount / 2) d -= tileCount;
     return d;
   }
+
+  function nearestApple() {
+    let best = null;
+    let bestDist = Infinity;
+    for (const a of apples) {
+      const dx = Math.abs(diff(head.x, a.x));
+      const dy = Math.abs(diff(head.y, a.y));
+      const dist = dx + dy;
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = a;
+      }
+    }
+    return best;
+  }
+
+  const target = aiBehavior === 'aggressive' ? nearestApple() : apples[0];
+  if (!target) return;
 
   const dx = diff(head.x, target.x);
   const dy = diff(head.y, target.y);
