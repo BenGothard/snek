@@ -19,6 +19,7 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 - Choose from multiple visual themes.
 - Leaderboards are stored per difficulty and include player names.
 - The theme defaults to dark when your system prefers it.
+- Battle against multiple AI-controlled snakes.
 
 Enjoy!
 
