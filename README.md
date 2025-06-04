@@ -50,6 +50,9 @@ npm run serve
 
 Then open the provided URL in your browser to play the game locally.
 
+The game now remembers your chosen theme and player name in your browser's
+local storage so you don't have to re-enter them next time.
+
 ### Online scores
 
 The game tries to submit scores, including player names, to a placeholder
