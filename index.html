@@ -8,11 +8,11 @@
 </head>
 <body>
   <h1>Snek</h1>
-  <div id="layout">
-    <div id="game-wrapper">
-      <canvas id="game" width="480" height="480" role="img" aria-label="Snake game board">
-        Your browser does not support the HTML canvas tag.
-      </canvas>
+    <div id="layout">
+      <div id="game-wrapper">
+        <canvas id="game" width="480" height="480" role="img" aria-label="Snake game board">
+          Your browser does not support the HTML canvas tag.
+        </canvas>
       <div id="game-over" style="display:none">Game Over</div>
       <div id="paused" style="display:none">Paused</div>
       <div id="touch-controls">
@@ -22,29 +22,31 @@
         <button id="btn-right" aria-label="Right">&#8594;</button>
         <button id="btn-pause" aria-label="Pause">Pause</button>
       </div>
-    </div>
-    <div id="sidebar">
-      <label for="player-name">Name:</label>
-      <input id="player-name" placeholder="Your name" />
-      <button id="start">Start Game</button>
-      <button id="pause">Pause</button>
+      </div>
+      <div id="sidebar">
+        <h2>Leaderboard</h2>
+        <ol id="leaderboard"></ol>
+      </div>
+      <div id="controls">
+        <label for="player-name">Name:</label>
+        <input id="player-name" placeholder="Your name" />
+        <button id="start">Start Game</button>
+        <button id="pause">Pause</button>
         <div id="instructions">
           Use the arrow keys or WASD to move. Hold the spacebar to speed up. Collect blue speed apples for a short boost and purple ghost apples to pass through obstacles briefly. Use the <strong>Pause</strong> button or press <kbd>p</kbd> to pause/resume.
         </div>
-      <div id="options">
-        <label for="theme">Theme:</label>
-        <select id="theme">
-          <option value="classic" selected>Classic</option>
-          <option value="dark">Dark</option>
-          <option value="neon">Neon</option>
-        </select>
+        <div id="options">
+          <label for="theme">Theme:</label>
+          <select id="theme">
+            <option value="classic" selected>Classic</option>
+            <option value="dark">Dark</option>
+            <option value="neon">Neon</option>
+          </select>
+        </div>
+        <p id="score">Score: 0</p>
+        <div id="npc-scores"></div>
       </div>
-      <p id="score">Score: 0</p>
-      <div id="npc-scores"></div>
-      <h2>Leaderboard</h2>
-      <ol id="leaderboard"></ol>
     </div>
-  </div>
   <script type="module" src="script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

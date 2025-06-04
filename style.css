@@ -132,6 +132,11 @@ h1 {
   margin: 0 auto;
 }
 
+#controls {
+  max-width: 250px;
+  margin: 0 auto;
+}
+
 #touch-controls {
   display: grid;
   grid-template-columns: repeat(3, 60px);
@@ -183,6 +188,11 @@ h1 {
   }
   #game-wrapper {
     order: 2;
+  }
+  #controls {
+    text-align: left;
+    order: 3;
+    margin-left: 20px;
   }
   #leaderboard {
     margin-left: 0;
