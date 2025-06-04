@@ -150,7 +150,7 @@ const fastFrameDelay = 75; // ms when holding spacebar
 let fastMode = false;
 let speedBoost = 0;
 let ghostMode = 0;
-let aiBehavior = 'aggressive';
+let aiBehavior = 'tryhard';
 
 const themes = {
   classic: {
@@ -363,7 +363,7 @@ function gameLoop(timestamp) {
 let lastTime = 0;
 
 function chooseNpcVelocity(npc) {
-  if (!apples.length) return;
+  if (!apples.length && snake.length === 0) return;
   const head = npc.snake[0];
 
   function isBlocked(nx, ny) {
@@ -385,27 +385,6 @@ function chooseNpcVelocity(npc) {
     return false;
   }
 
-  if (aiBehavior === 'random') {
-    const dirs = [
-      { x: 1, y: 0 },
-      { x: -1, y: 0 },
-      { x: 0, y: 1 },
-      { x: 0, y: -1 }
-    ];
-    for (let i = dirs.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [dirs[i], dirs[j]] = [dirs[j], dirs[i]];
-    }
-    for (const dir of dirs) {
-      const nx = (head.x + dir.x + tileCount) % tileCount;
-      const ny = (head.y + dir.y + tileCount) % tileCount;
-      if (!isBlocked(nx, ny)) {
-        npc.velocity = dir;
-        return;
-      }
-    }
-    return;
-  }
 
   function diff(a, b) {
     let d = (b - a + tileCount) % tileCount;
@@ -428,8 +407,16 @@ function chooseNpcVelocity(npc) {
     return best;
   }
 
-  const target = aiBehavior === 'aggressive' ? nearestApple() : apples[0];
-  if (!target) return;
+  const playerHead = snake[0];
+  const growPhase = npc.snake.length < 6;
+  const chaseChance = Math.min(1, (npc.snake.length - 3) / 12);
+  let target;
+  if (!growPhase && Math.random() < chaseChance) {
+    target = playerHead;
+  } else {
+    target = nearestApple();
+  }
+  if (!target) target = playerHead;
 
   const dx = diff(head.x, target.x);
   const dy = diff(head.y, target.y);
@@ -442,7 +429,7 @@ function chooseNpcVelocity(npc) {
     { x: -primary[0].x, y: -primary[0].y },
     { x: -primary[1].x, y: -primary[1].y }
   ];
-  if (aiBehavior === 'normal' && Math.random() < 0.3) {
+  if (growPhase && Math.random() < 0.3) {
     dirs.sort(() => Math.random() - 0.5);
   }
 
