@@ -95,12 +95,13 @@ const APPLE_SPAWN_MAX = 3500; // maximum new apple delay in ms
 
 function randomEmptyPosition() {
   const maxAttempts = 100;
+  const occupied = snake.concat(getAllNpcParts());
   for (let attempts = 0; attempts < maxAttempts; attempts++) {
     const pos = {
       x: Math.floor(Math.random() * tileCount),
       y: Math.floor(Math.random() * tileCount)
     };
-    if (!isOccupied(pos.x, pos.y, snake.concat(getAllNpcParts()), apples, obstacles)) {
+    if (!isOccupied(pos.x, pos.y, occupied, apples, obstacles)) {
       return pos;
     }
   }
@@ -108,8 +109,6 @@ function randomEmptyPosition() {
 }
 
 const randomObstacle = () => randomEmptyPosition();
-
-const randomNpcStart = () => randomEmptyPosition();
 
 let snake = [{ x: 10, y: 10 }];
 let velocity = { x: 0, y: 0 };
@@ -120,7 +119,7 @@ function getAllNpcParts() {
 
 function spawnNpc() {
   if (npcs.length >= NPC_COUNT) return;
-  const startPos = randomNpcStart();
+  const startPos = randomEmptyPosition();
   if (!startPos) return;
   const npc = {
     snake: [startPos],
@@ -130,7 +129,6 @@ function spawnNpc() {
   };
   npcs.push(npc);
   console.log(`NPC spawned at (${startPos.x}, ${startPos.y})`);
-  updateScore();
 }
 
 function scheduleNpcSpawn() {
@@ -290,7 +288,7 @@ function addScore(newScore) {
   if (list.length > 10) list.length = 10;
   saveLeaderboard(scores);
   renderLeaderboard();
-  postScoreOnline(newScore);
+  postScoreOnline(newScore).catch(console.error);
   console.log(`Score recorded: ${newScore.name} - ${newScore.score}`);
 }
 
@@ -326,15 +324,10 @@ function reset() {
   for (let i = 0; i < NPC_COUNT; i++) {
     spawnNpc();
   }
-  updateScore();
   canvas.style.background = currentTheme.bg;
   document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
   speedBoost = 0;
   ghostMode = 0;
-}
-
-function updateScore() {
-  // scores are tracked internally but no longer displayed
 }
 
 function updateDifficulty() {
@@ -365,7 +358,6 @@ function removeNpc(npc) {
     }
   }
   console.log('NPC removed');
-  updateScore();
   scheduleNpcSpawn();
 }
 
@@ -520,7 +512,6 @@ function step(timestamp) {
     const a = apples[i];
     if (head.x === a.x && head.y === a.y) {
       score += a.type === 'gold' ? 5 : 1;
-      updateScore();
       updateDifficulty();
       console.log(`Ate ${a.type} apple at (${a.x}, ${a.y})`);
       eatSound.currentTime = 0;
@@ -609,7 +600,6 @@ function step(timestamp) {
       const a = apples[i];
       if (npcHead.x === a.x && npcHead.y === a.y) {
         npc.score += a.type === 'gold' ? 5 : 1;
-        updateScore();
         console.log(`NPC ate ${a.type} apple at (${a.x}, ${a.y})`);
         eatSound.currentTime = 0;
         eatSound.play();
