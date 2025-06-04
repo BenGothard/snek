@@ -233,3 +233,16 @@ body.neon #leaderboard li {
     height: 90vmin;
   }
 }
+
+.dev-log {
+  display: none;
+  background: #000;
+  color: #0f0;
+  padding: 10px;
+  font-family: monospace;
+  max-height: 200px;
+  overflow: auto;
+  text-align: left;
+  width: 90%;
+  margin: 0 auto;
+}
