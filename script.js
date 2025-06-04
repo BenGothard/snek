@@ -19,16 +19,6 @@ const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
 const terminalEl = document.getElementById('terminal-log');
 const toggleLogBtn = document.getElementById('toggle-log');
-const muteButton = document.getElementById('mute');
-let muted = localStorage.getItem('muted') === 'true';
-if (muteButton) {
-  muteButton.textContent = muted ? 'Unmute' : 'Mute';
-  muteButton.addEventListener('click', () => {
-    muted = !muted;
-    localStorage.setItem('muted', muted);
-    muteButton.textContent = muted ? 'Unmute' : 'Mute';
-  });
-}
 if (terminalEl) {
   ['log', 'warn', 'error'].forEach(level => {
     const orig = console[level].bind(console);
@@ -65,32 +55,6 @@ const DEFAULT_CONFIG = {
 
 const CONFIG = await loadRemoteConfig(DEFAULT_CONFIG);
 const SCORE_API = CONFIG.HIGH_SCORE_API_URL;
-
-// Sound effects
-// Use simple beeps so the game doesn't depend on external assets
-
-let audioCtx;
-function beep(duration = 200, frequency = 440, volume = 0.2) {
-  try {
-    audioCtx =
-      audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.frequency.value = frequency;
-    gain.gain.value = volume;
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration / 1000);
-  } catch (e) {
-    console.error('Beep failed', e);
-  }
-}
-
-function playSound(freq = 440, duration = 200) {
-  if (muted) return;
-  beep(duration, freq);
-}
 
 if (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
   themeSelect.value = 'dark';
@@ -389,7 +353,6 @@ function removeNpc(npc) {
     }
   }
   console.log('NPC removed');
-  playSound(330, 300);
   scheduleNpcSpawn();
 }
 
@@ -408,7 +371,6 @@ function gameLoop(timestamp) {
     addScore({ name: playerName || 'Anonymous', score });
     reset();
     gameOverEl.style.display = 'block';
-    playSound(330, 300);
     running = false;
     startButton.disabled = false;
   }
@@ -545,9 +507,6 @@ function step(timestamp) {
       score += a.type === 'gold' ? 5 : 1;
       updateDifficulty();
       console.log(`Ate ${a.type} apple at (${a.x}, ${a.y})`);
-      if (a.type !== 'normal') {
-        playSound(660, 150);
-      }
         if (a.type === 'speed') {
           speedBoost = 40;
         } else if (a.type === 'ghost') {
@@ -633,9 +592,6 @@ function step(timestamp) {
       if (npcHead.x === a.x && npcHead.y === a.y) {
         npc.score += a.type === 'gold' ? 5 : 1;
         console.log(`NPC ate ${a.type} apple at (${a.x}, ${a.y})`);
-        if (a.type !== 'normal') {
-          playSound(660, 150);
-        }
         npc.growing += a.type === 'gold' ? 2 : 1;
         const newApple = randomApple(
           tileCount,
