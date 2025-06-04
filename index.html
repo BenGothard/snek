@@ -26,7 +26,6 @@
       <div id="sidebar">
         <h2>Leaderboard</h2>
         <ol id="leaderboard"></ol>
-        <button id="toggle-leaderboard" aria-expanded="false">Show Top 10</button>
       </div>
       <div id="controls">
         <label for="player-name">Name:</label>
@@ -46,12 +45,12 @@
         </div>
       </div>
     </div>
+    <pre id="terminal-log" class="terminal-log"></pre>
   <script type="module" src="script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js');
     }
   </script>
-  <pre id="dev-log" class="dev-log"></pre>
 </body>
 </html>

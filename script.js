@@ -15,22 +15,17 @@ const rightBtn = document.getElementById('btn-right');
 const pauseTouchBtn = document.getElementById('btn-pause');
 const playerNameInput = document.getElementById('player-name');
 const leaderboardEl = document.getElementById('leaderboard');
-const toggleLbBtn = document.getElementById('toggle-leaderboard');
-let leaderboardExpanded = false;
 const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
-const devLogEl = document.getElementById('dev-log');
-const devMode =
-  (typeof window !== 'undefined' && window.DEV_MODE) ||
-  new URLSearchParams(location.search).get('dev') === '1';
-if (devMode && devLogEl) {
-  devLogEl.style.display = 'block';
+const terminalEl = document.getElementById('terminal-log');
+if (terminalEl) {
   ['log', 'warn', 'error'].forEach(level => {
     const orig = console[level].bind(console);
     console[level] = (...args) => {
       orig(...args);
-      devLogEl.textContent += args.join(' ') + '\n';
+      terminalEl.textContent += args.join(' ') + '\n';
+      terminalEl.scrollTop = terminalEl.scrollHeight;
     };
   });
 }
@@ -126,6 +121,7 @@ function spawnNpc() {
     score: 0
   };
   npcs.push(npc);
+  console.log(`NPC spawned at (${startPos.x}, ${startPos.y})`);
   updateScore();
 }
 
@@ -151,6 +147,7 @@ function scheduleAppleSpawn() {
     );
     if (a) {
       apples.push(a);
+      console.log(`Apple spawned at (${a.x}, ${a.y})`);
     }
     scheduleAppleSpawn();
   }, delay);
@@ -257,17 +254,12 @@ function renderLeaderboard() {
   const scores = loadLeaderboard();
   const list = scores[currentDifficulty] || [];
   leaderboardEl.innerHTML = '';
-  const limit = leaderboardExpanded ? 10 : 5;
+  const limit = 10;
   list.slice(0, limit).forEach((s, i) => {
     const li = document.createElement('li');
     li.textContent = `${i + 1}. ${s.name}: ${s.score}`;
     leaderboardEl.appendChild(li);
   });
-  if (toggleLbBtn) {
-    toggleLbBtn.style.display = list.length > 5 ? 'block' : 'none';
-    toggleLbBtn.textContent = leaderboardExpanded ? 'Show Top 5' : 'Show Top 10';
-    toggleLbBtn.setAttribute('aria-expanded', leaderboardExpanded);
-  }
   if (onlineScores.length) {
     const header = document.createElement('li');
     header.textContent = '--- Online ---';
@@ -291,6 +283,7 @@ function addScore(newScore) {
   saveLeaderboard(scores);
   renderLeaderboard();
   postScoreOnline(newScore);
+  console.log(`Score recorded: ${newScore.name} - ${newScore.score}`);
 }
 
 function reset() {
@@ -305,6 +298,7 @@ function reset() {
     const a = randomApple(tileCount, snake.concat(getAllNpcParts()), apples, obstacles);
     if (a) {
       apples.push(a);
+      console.log(`Apple spawned at (${a.x}, ${a.y})`);
     } else {
       break;
     }
@@ -313,6 +307,7 @@ function reset() {
     const o = randomObstacle();
     if (o) {
       obstacles.push(o);
+      console.log(`Obstacle placed at (${o.x}, ${o.y})`);
     } else {
       break;
     }
@@ -361,6 +356,7 @@ function removeNpc(npc) {
       apples.push({ x: part.x, y: part.y, type: 'normal' });
     }
   }
+  console.log('NPC removed');
   updateScore();
   scheduleNpcSpawn();
 }
@@ -376,6 +372,7 @@ function gameLoop(timestamp) {
     draw();
     requestAnimationFrame(gameLoop);
   } else {
+    console.log('Game over');
     addScore({ name: playerName || 'Anonymous', score });
     reset();
     gameOverEl.style.display = 'block';
@@ -517,6 +514,7 @@ function step(timestamp) {
       score += a.type === 'gold' ? 5 : 1;
       updateScore();
       updateDifficulty();
+      console.log(`Ate ${a.type} apple at (${a.x}, ${a.y})`);
       eatSound.currentTime = 0;
       eatSound.play();
         if (a.type === 'speed') {
@@ -604,6 +602,7 @@ function step(timestamp) {
       if (npcHead.x === a.x && npcHead.y === a.y) {
         npc.score += a.type === 'gold' ? 5 : 1;
         updateScore();
+        console.log(`NPC ate ${a.type} apple at (${a.x}, ${a.y})`);
         eatSound.currentTime = 0;
         eatSound.play();
         npc.growing += a.type === 'gold' ? 2 : 1;
@@ -671,16 +670,28 @@ function draw() {
 function setDirection(dir) {
   switch (dir) {
     case 'up':
-      if (velocity.y !== 1) velocity = { x: 0, y: -1 };
+      if (velocity.y !== 1) {
+        velocity = { x: 0, y: -1 };
+        console.log('Direction: up');
+      }
       break;
     case 'down':
-      if (velocity.y !== -1) velocity = { x: 0, y: 1 };
+      if (velocity.y !== -1) {
+        velocity = { x: 0, y: 1 };
+        console.log('Direction: down');
+      }
       break;
     case 'left':
-      if (velocity.x !== 1) velocity = { x: -1, y: 0 };
+      if (velocity.x !== 1) {
+        velocity = { x: -1, y: 0 };
+        console.log('Direction: left');
+      }
       break;
     case 'right':
-      if (velocity.x !== -1) velocity = { x: 1, y: 0 };
+      if (velocity.x !== -1) {
+        velocity = { x: 1, y: 0 };
+        console.log('Direction: right');
+      }
       break;
   }
 }
@@ -747,13 +758,6 @@ reset();
 renderLeaderboard();
 loadOnlineLeaderboard();
 flushScores(SCORE_API);
-if (toggleLbBtn) {
-  toggleLbBtn.addEventListener('click', () => {
-    leaderboardExpanded = !leaderboardExpanded;
-    leaderboardEl.classList.toggle('expanded', leaderboardExpanded);
-    renderLeaderboard();
-  });
-}
 startButton.addEventListener('click', () => {
   // give the snake an initial direction so it doesn't immediately
   // collide with itself when the game starts
@@ -766,6 +770,7 @@ startButton.addEventListener('click', () => {
   paused = false;
   pausedEl.style.display = 'none';
   running = true;
+  console.log('Game started');
   scheduleAppleSpawn();
   lastTime = 0;
   requestAnimationFrame(gameLoop);
