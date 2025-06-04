@@ -23,14 +23,3 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: snek-site
-          path: |
-            index.html
-            script.js
-            service-worker.js
-            game.js
-            style.css
-            assets
