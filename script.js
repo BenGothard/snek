@@ -15,8 +15,6 @@ const rightBtn = document.getElementById('btn-right');
 const pauseTouchBtn = document.getElementById('btn-pause');
 const playerNameInput = document.getElementById('player-name');
 const leaderboardEl = document.getElementById('leaderboard');
-const toggleLbBtn = document.getElementById('toggle-leaderboard');
-let leaderboardExpanded = false;
 const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
@@ -257,17 +255,11 @@ function renderLeaderboard() {
   const scores = loadLeaderboard();
   const list = scores[currentDifficulty] || [];
   leaderboardEl.innerHTML = '';
-  const limit = leaderboardExpanded ? 10 : 5;
-  list.slice(0, limit).forEach((s, i) => {
+  list.slice(0, 10).forEach((s, i) => {
     const li = document.createElement('li');
     li.textContent = `${i + 1}. ${s.name}: ${s.score}`;
     leaderboardEl.appendChild(li);
   });
-  if (toggleLbBtn) {
-    toggleLbBtn.style.display = list.length > 5 ? 'block' : 'none';
-    toggleLbBtn.textContent = leaderboardExpanded ? 'Show Top 5' : 'Show Top 10';
-    toggleLbBtn.setAttribute('aria-expanded', leaderboardExpanded);
-  }
   if (onlineScores.length) {
     const header = document.createElement('li');
     header.textContent = '--- Online ---';
@@ -741,13 +733,6 @@ reset();
 renderLeaderboard();
 loadOnlineLeaderboard();
 flushScores(SCORE_API);
-if (toggleLbBtn) {
-  toggleLbBtn.addEventListener('click', () => {
-    leaderboardExpanded = !leaderboardExpanded;
-    leaderboardEl.classList.toggle('expanded', leaderboardExpanded);
-    renderLeaderboard();
-  });
-}
 startButton.addEventListener('click', () => {
   // give the snake an initial direction so it doesn't immediately
   // collide with itself when the game starts
