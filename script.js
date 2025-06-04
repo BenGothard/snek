@@ -6,8 +6,6 @@ import { loadOnlineLeaderboard as fetchLeaderboard, postScoreOnline as submitSco
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const scoreEl = document.getElementById('score');
-const npcScoresEl = document.getElementById('npc-scores');
 const startButton = document.getElementById('start');
 const pauseButton = document.getElementById('pause');
 const upBtn = document.getElementById('btn-up');
@@ -109,11 +107,8 @@ function spawnNpc() {
     snake: [startPos],
     velocity: { x: 0, y: 0 },
     growing: 0,
-    score: 0,
-    scoreEl: document.createElement('p')
+    score: 0
   };
-  npc.scoreEl.textContent = `NPC ${npcs.length + 1} Score: 0`;
-  npcScoresEl.appendChild(npc.scoreEl);
   npcs.push(npc);
   updateScore();
 }
@@ -303,7 +298,6 @@ function reset() {
   growing = 0;
   score = 0;
   npcs = [];
-  npcScoresEl.innerHTML = '';
   for (let i = 0; i < NPC_COUNT; i++) {
     spawnNpc();
   }
@@ -315,10 +309,7 @@ function reset() {
 }
 
 function updateScore() {
-  scoreEl.textContent = `Score: ${score}`;
-  npcs.forEach((npc, i) => {
-    npc.scoreEl.textContent = `NPC ${i + 1} Score: ${npc.score}`;
-  });
+  // scores are tracked internally but no longer displayed
 }
 
 function updateDifficulty() {
@@ -341,7 +332,6 @@ function updateDifficulty() {
 }
 
 function removeNpc(npc) {
-  npc.scoreEl.remove();
   npcs = npcs.filter(n => n !== npc);
   updateScore();
   scheduleNpcSpawn();
