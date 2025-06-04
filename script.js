@@ -532,12 +532,20 @@ function step(timestamp) {
     npcHead.x = (npcHead.x + tileCount) % tileCount;
     npcHead.y = (npcHead.y + tileCount) % tileCount;
 
-    for (let part of snake) {
+    let dead = false;
+    // check collision with player
+    if (snake[0].x === npcHead.x && snake[0].y === npcHead.y && ghostMode === 0) {
+      // NPC hit the player's head - game over
+      return false;
+    }
+    for (let i = 1; i < snake.length; i++) {
+      const part = snake[i];
       if (part.x === npcHead.x && part.y === npcHead.y && ghostMode === 0) {
-        return false;
+        // NPC ran into player's body - NPC dies
+        dead = true;
+        break;
       }
     }
-    let dead = false;
     for (const other of npcs) {
       if (other === npc) continue;
       for (let part of other.snake) {
