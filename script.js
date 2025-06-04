@@ -21,6 +21,16 @@ const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
 
+// Prefill inputs from previous session
+const storedTheme = localStorage.getItem('theme');
+if (storedTheme) {
+  themeSelect.value = storedTheme;
+}
+const storedName = localStorage.getItem('playerName');
+if (storedName) {
+  playerNameInput.value = storedName;
+}
+
 // Remote configuration defaults
 const DEFAULT_CONFIG = {
   ASSET_BASE_URL: '',
@@ -32,9 +42,9 @@ const SCORE_API = CONFIG.HIGH_SCORE_API_URL;
 
 // Sound effects
 const eatSound = new Audio(URL.createObjectURL(await loadAsset('eat.mp3', CONFIG.ASSET_BASE_URL)));
-const gameOverSound = new Audio(URL.createObjectURL(await loadAsset('gameover.mp3', CONFIG.ASSET_BASE_URL)));
+const gameOverSound = new Audio(URL.createObjectURL(await loadAsset('gameover.mp3', CONFIG.ASSET_BASE_URL))); 
 
-if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+if (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
   themeSelect.value = 'dark';
 }
 
@@ -699,6 +709,7 @@ themeSelect.addEventListener('change', () => {
   currentTheme = themes[themeSelect.value] || themes.classic;
   canvas.style.background = currentTheme.bg;
   document.body.className = themeSelect.value === 'classic' ? '' : themeSelect.value;
+  localStorage.setItem('theme', themeSelect.value);
   if (!running) draw();
 });
 
@@ -713,6 +724,8 @@ startButton.addEventListener('click', () => {
   // collide with itself when the game starts
   velocity = { x: 1, y: 0 };
   playerName = playerNameInput.value.trim() || 'Anonymous';
+  localStorage.setItem('playerName', playerNameInput.value.trim());
+  localStorage.setItem('theme', themeSelect.value);
   startButton.disabled = true;
   gameOverEl.style.display = 'none';
   paused = false;
