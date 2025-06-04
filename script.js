@@ -67,12 +67,14 @@ window.addEventListener('resize', () => {
 });
 
 resizeCanvas();
-const appleCount = 3;
+// Start with more apples on the board
+const appleCount = 5;
 const NPC_COUNT = 3;
 const NPC_SPAWN_MIN = 2000; // minimum respawn delay in ms
 const NPC_SPAWN_MAX = 5000; // maximum respawn delay in ms
-const APPLE_SPAWN_MIN = 4000; // minimum new apple delay in ms
-const APPLE_SPAWN_MAX = 7000; // maximum new apple delay in ms
+// Spawn new apples more frequently
+const APPLE_SPAWN_MIN = 2000; // minimum new apple delay in ms
+const APPLE_SPAWN_MAX = 3500; // maximum new apple delay in ms
 
 function randomEmptyPosition() {
   const maxAttempts = 100;
