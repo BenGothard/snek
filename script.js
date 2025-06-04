@@ -20,6 +20,20 @@ const leaderboardEl = document.getElementById('leaderboard');
 const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
+const devLogEl = document.getElementById('dev-log');
+const devMode =
+  (typeof window !== 'undefined' && window.DEV_MODE) ||
+  new URLSearchParams(location.search).get('dev') === '1';
+if (devMode && devLogEl) {
+  devLogEl.style.display = 'block';
+  ['log', 'warn', 'error'].forEach(level => {
+    const orig = console[level].bind(console);
+    console[level] = (...args) => {
+      orig(...args);
+      devLogEl.textContent += args.join(' ') + '\n';
+    };
+  });
+}
 
 // Prefill inputs from previous session
 const storedTheme = localStorage.getItem('theme');
