@@ -355,6 +355,12 @@ function updateDifficulty() {
 
 function removeNpc(npc) {
   npcs = npcs.filter(n => n !== npc);
+  // drop apples where the NPC segments were
+  for (const part of npc.snake) {
+    if (!isOccupied(part.x, part.y, snake.concat(getAllNpcParts()), apples, obstacles)) {
+      apples.push({ x: part.x, y: part.y, type: 'normal' });
+    }
+  }
   updateScore();
   scheduleNpcSpawn();
 }
