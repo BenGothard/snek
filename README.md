@@ -23,7 +23,8 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 - Leaderboards are stored per difficulty and include player names.
 - The theme defaults to dark when your system prefers it.
 - Battle against multiple AI-controlled snakes.
-- AI-controlled snakes aggressively hunt apples.
+- AI-controlled snakes start by hunting apples to grow but increasingly try to
+  hunt the player as they get bigger.
 - The AI snakes can eliminate each other for a free-for-all battle.
 - AI snakes spawn at random locations for a new challenge each game.
 
