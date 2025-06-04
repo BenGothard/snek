@@ -19,6 +19,7 @@ const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
 const terminalEl = document.getElementById('terminal-log');
+const toggleLogBtn = document.getElementById('toggle-log');
 if (terminalEl) {
   ['log', 'warn', 'error'].forEach(level => {
     const orig = console[level].bind(console);
@@ -27,6 +28,13 @@ if (terminalEl) {
       terminalEl.textContent += args.join(' ') + '\n';
       terminalEl.scrollTop = terminalEl.scrollHeight;
     };
+  });
+}
+if (toggleLogBtn && terminalEl) {
+  toggleLogBtn.addEventListener('click', () => {
+    const hidden = terminalEl.style.display === 'none';
+    terminalEl.style.display = hidden ? 'block' : 'none';
+    toggleLogBtn.textContent = hidden ? 'Hide Log' : 'Show Log';
   });
 }
 
