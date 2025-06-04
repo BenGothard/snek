@@ -19,6 +19,16 @@ const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
 const terminalEl = document.getElementById('terminal-log');
 const toggleLogBtn = document.getElementById('toggle-log');
+const muteButton = document.getElementById('mute');
+let muted = localStorage.getItem('muted') === 'true';
+if (muteButton) {
+  muteButton.textContent = muted ? 'Unmute' : 'Mute';
+  muteButton.addEventListener('click', () => {
+    muted = !muted;
+    localStorage.setItem('muted', muted);
+    muteButton.textContent = muted ? 'Unmute' : 'Mute';
+  });
+}
 if (terminalEl) {
   ['log', 'warn', 'error'].forEach(level => {
     const orig = console[level].bind(console);
@@ -60,7 +70,7 @@ const SCORE_API = CONFIG.HIGH_SCORE_API_URL;
 // Use simple beeps so the game doesn't depend on external assets
 
 let audioCtx;
-function beep(duration = 200, frequency = 440, volume = 0.5) {
+function beep(duration = 200, frequency = 440, volume = 0.2) {
   try {
     audioCtx =
       audioCtx || new (window.AudioContext || window.webkitAudioContext)();
@@ -78,6 +88,7 @@ function beep(duration = 200, frequency = 440, volume = 0.5) {
 }
 
 function playSound(freq = 440, duration = 200) {
+  if (muted) return;
   beep(duration, freq);
 }
 
@@ -378,6 +389,7 @@ function removeNpc(npc) {
     }
   }
   console.log('NPC removed');
+  playSound(330, 300);
   scheduleNpcSpawn();
 }
 
@@ -533,7 +545,9 @@ function step(timestamp) {
       score += a.type === 'gold' ? 5 : 1;
       updateDifficulty();
       console.log(`Ate ${a.type} apple at (${a.x}, ${a.y})`);
-      playSound(660, 150);
+      if (a.type !== 'normal') {
+        playSound(660, 150);
+      }
         if (a.type === 'speed') {
           speedBoost = 40;
         } else if (a.type === 'ghost') {
@@ -619,7 +633,9 @@ function step(timestamp) {
       if (npcHead.x === a.x && npcHead.y === a.y) {
         npc.score += a.type === 'gold' ? 5 : 1;
         console.log(`NPC ate ${a.type} apple at (${a.x}, ${a.y})`);
-        playSound(660, 150);
+        if (a.type !== 'normal') {
+          playSound(660, 150);
+        }
         npc.growing += a.type === 'gold' ? 2 : 1;
         const newApple = randomApple(
           tileCount,
