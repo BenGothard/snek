@@ -64,7 +64,7 @@ const NPC_SPAWN_MAX = 5000; // maximum respawn delay in ms
 const APPLE_SPAWN_MIN = 4000; // minimum new apple delay in ms
 const APPLE_SPAWN_MAX = 7000; // maximum new apple delay in ms
 
-function randomObstacle() {
+function randomEmptyPosition() {
   const maxAttempts = 100;
   for (let attempts = 0; attempts < maxAttempts; attempts++) {
     const pos = {
@@ -78,19 +78,9 @@ function randomObstacle() {
   return null;
 }
 
-function randomNpcStart() {
-  const maxAttempts = 100;
-  for (let attempts = 0; attempts < maxAttempts; attempts++) {
-    const pos = {
-      x: Math.floor(Math.random() * tileCount),
-      y: Math.floor(Math.random() * tileCount)
-    };
-    if (!isOccupied(pos.x, pos.y, snake.concat(getAllNpcParts()), apples, obstacles)) {
-      return pos;
-    }
-  }
-  return null;
-}
+const randomObstacle = () => randomEmptyPosition();
+
+const randomNpcStart = () => randomEmptyPosition();
 
 let snake = [{ x: 10, y: 10 }];
 let velocity = { x: 0, y: 0 };
@@ -160,7 +150,6 @@ const fastFrameDelay = 75; // ms when holding spacebar
 let fastMode = false;
 let speedBoost = 0;
 let ghostMode = 0;
-let aiBehavior = 'tryhard';
 
 const themes = {
   classic: {
