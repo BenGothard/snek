@@ -50,11 +50,12 @@ if (storedName) {
 // Remote configuration defaults
 const DEFAULT_CONFIG = {
   ASSET_BASE_URL: '',
-  HIGH_SCORE_API_URL: 'https://example.com/api/scores'
+  HIGH_SCORE_API_URL: ''
 };
 
 const CONFIG = await loadRemoteConfig(DEFAULT_CONFIG);
 const SCORE_API = CONFIG.HIGH_SCORE_API_URL;
+const ONLINE_ENABLED = Boolean(SCORE_API);
 
 if (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
   themeSelect.value = 'dark';
@@ -212,6 +213,7 @@ let onlineScores = [];
 let playerName = '';
 
 async function loadOnlineLeaderboard() {
+  if (!ONLINE_ENABLED) return;
   try {
     onlineScores = await fetchLeaderboard(SCORE_API);
   } catch {
@@ -220,13 +222,14 @@ async function loadOnlineLeaderboard() {
 }
 
 async function postScoreOnline(scoreData) {
+  if (!ONLINE_ENABLED) return;
   try {
     await submitScore(SCORE_API, scoreData);
   } catch (e) {
     const list = loadUnsentScores();
     list.push(scoreData);
     saveUnsentScores(list);
-    throw e;
+    console.warn('Failed to submit score', e);
   }
 }
 
@@ -283,7 +286,7 @@ function addScore(newScore) {
   if (list.length > 10) list.length = 10;
   saveLeaderboard(scores);
   renderLeaderboard();
-  postScoreOnline(newScore).catch(console.error);
+  postScoreOnline(newScore);
   console.log(`Score recorded: ${newScore.name} - ${newScore.score}`);
 }
 
@@ -743,8 +746,10 @@ themeSelect.addEventListener('change', () => {
 
 reset();
 renderLeaderboard();
-loadOnlineLeaderboard();
-flushScores(SCORE_API);
+if (ONLINE_ENABLED) {
+  loadOnlineLeaderboard();
+  flushScores(SCORE_API);
+}
 startButton.addEventListener('click', () => {
   // give the snake an initial direction so it doesn't immediately
   // collide with itself when the game starts
