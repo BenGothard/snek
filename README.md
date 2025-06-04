@@ -76,3 +76,7 @@ Example remote config JSON:
 ```
 
 Removing the calls to `postScoreOnline` will disable online score submission entirely.
+
+## Installing as a PWA
+
+Snek includes a simple service worker so the game can be installed as a Progressive Web App. Open `index.html` in a browser that supports PWAs and choose the install option when prompted or from the browser menu. Once installed, the game will run offline using cached assets.
