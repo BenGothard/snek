@@ -1,7 +1,6 @@
 import { isOccupied, randomApple, updateSpeed as calcSpeed } from './game.js';
 import { fetchWithRetry } from './http_client.js';
 import { loadRemoteConfig } from './remote_config.js';
-import { loadAsset } from './asset_loader.js';
 import { loadOnlineLeaderboard as fetchLeaderboard, postScoreOnline as submitScore, loadUnsentScores, saveUnsentScores, flushUnsentScores as flushScores } from './scores.js';
 
 const canvas = document.getElementById('game');
@@ -58,8 +57,29 @@ const CONFIG = await loadRemoteConfig(DEFAULT_CONFIG);
 const SCORE_API = CONFIG.HIGH_SCORE_API_URL;
 
 // Sound effects
-const eatSound = new Audio(URL.createObjectURL(await loadAsset('eat.mp3', CONFIG.ASSET_BASE_URL)));
-const gameOverSound = new Audio(URL.createObjectURL(await loadAsset('gameover.mp3', CONFIG.ASSET_BASE_URL))); 
+// Use simple beeps so the game doesn't depend on external assets
+
+let audioCtx;
+function beep(duration = 200, frequency = 440, volume = 0.5) {
+  try {
+    audioCtx =
+      audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = frequency;
+    gain.gain.value = volume;
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration / 1000);
+  } catch (e) {
+    console.error('Beep failed', e);
+  }
+}
+
+function playSound(freq = 440, duration = 200) {
+  beep(duration, freq);
+}
 
 if (!storedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
   themeSelect.value = 'dark';
@@ -376,8 +396,7 @@ function gameLoop(timestamp) {
     addScore({ name: playerName || 'Anonymous', score });
     reset();
     gameOverEl.style.display = 'block';
-    gameOverSound.currentTime = 0;
-    gameOverSound.play();
+    playSound(330, 300);
     running = false;
     startButton.disabled = false;
   }
@@ -514,8 +533,7 @@ function step(timestamp) {
       score += a.type === 'gold' ? 5 : 1;
       updateDifficulty();
       console.log(`Ate ${a.type} apple at (${a.x}, ${a.y})`);
-      eatSound.currentTime = 0;
-      eatSound.play();
+      playSound(660, 150);
         if (a.type === 'speed') {
           speedBoost = 40;
         } else if (a.type === 'ghost') {
@@ -601,8 +619,7 @@ function step(timestamp) {
       if (npcHead.x === a.x && npcHead.y === a.y) {
         npc.score += a.type === 'gold' ? 5 : 1;
         console.log(`NPC ate ${a.type} apple at (${a.x}, ${a.y})`);
-        eatSound.currentTime = 0;
-        eatSound.play();
+        playSound(660, 150);
         npc.growing += a.type === 'gold' ? 2 : 1;
         const newApple = randomApple(
           tileCount,

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'snek-cache-v1';
+const CACHE_NAME = 'snek-cache-v2';
 const URLS = [
   '/',
   '/index.html',
@@ -8,9 +8,7 @@ const URLS = [
   '/asset_loader.js',
   '/http_client.js',
   '/remote_config.js',
-  '/scores.js',
-  '/assets/eat.mp3',
-  '/assets/gameover.mp3'
+  '/scores.js'
 ];
 
 self.addEventListener('install', event => {
