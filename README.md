@@ -10,7 +10,7 @@ Use the arrow keys or WASD keys to control the snake. Eat apples to grow longer 
 Hold the spacebar to temporarily speed up the snake. Press <kbd>p</kbd> to pause or resume the game. Difficulty now increases automatically as you score, so just choose a theme before starting.
 You can also enter your name to record it on the local leaderboard and use the on-screen **Pause** or arrow buttons with a mouse or touch.
 
-Your highest scores are stored locally and displayed in the leaderboard below the game. The game will also try to fetch and submit online scores when possible.
+Your highest scores are stored locally and displayed in the leaderboard below the game. The game will also try to fetch and submit online scores when possible. Snek can optionally download assets, configuration, and scores from the internet when URLs are provided.
 
 ### Features
 
@@ -57,6 +57,19 @@ endpoint.
 
 #### Using a real backend
 
-Open `script.js` and change the value of the `SCORE_API` constant near the top of
-the file to the address of your server. Removing the calls to `postScoreOnline`
-will disable online score submission entirely.
+Snek requires internet access for online features. Configure these environment variables or set them on `window` before loading `script.js`:
+
+- `REMOTE_CONFIG_URL` &ndash; URL of a JSON file containing remote settings.
+- `ASSET_BASE_URL` &ndash; Base URL for downloading assets when missing locally.
+- `HIGH_SCORE_API_URL` &ndash; Endpoint for fetching and submitting scores.
+
+Example remote config JSON:
+
+```json
+{
+  "ASSET_BASE_URL": "https://cdn.example.com/snek/assets",
+  "HIGH_SCORE_API_URL": "https://api.example.com/snek/scores"
+}
+```
+
+Removing the calls to `postScoreOnline` will disable online score submission entirely.
