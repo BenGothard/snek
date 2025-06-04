@@ -75,8 +75,15 @@ button:hover {
   max-width: 200px;
   margin: 10px auto;
   text-align: left;
-  max-height: 200px;
+  max-height: 120px;
   overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+#leaderboard.expanded {
+  max-height: 240px;
+}
+#toggle-leaderboard {
+  margin-top: 5px;
 }
 #leaderboard li {
   margin: 2px 0;
