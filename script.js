@@ -1,4 +1,8 @@
 import { isOccupied, randomApple, updateSpeed as calcSpeed } from './game.js';
+import { fetchWithRetry } from './http_client.js';
+import { loadRemoteConfig } from './remote_config.js';
+import { loadAsset } from './asset_loader.js';
+import { loadOnlineLeaderboard as fetchLeaderboard, postScoreOnline as submitScore, loadUnsentScores, saveUnsentScores, flushUnsentScores as flushScores } from './scores.js';
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -17,12 +21,18 @@ const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
 
-// Online score endpoint
-const SCORE_API = 'https://example.com/api/scores';
+// Remote configuration defaults
+const DEFAULT_CONFIG = {
+  ASSET_BASE_URL: '',
+  HIGH_SCORE_API_URL: 'https://example.com/api/scores'
+};
+
+const CONFIG = await loadRemoteConfig(DEFAULT_CONFIG);
+const SCORE_API = CONFIG.HIGH_SCORE_API_URL;
 
 // Sound effects
-const eatSound = new Audio('assets/eat.mp3');
-const gameOverSound = new Audio('assets/gameover.mp3');
+const eatSound = new Audio(URL.createObjectURL(await loadAsset('eat.mp3', CONFIG.ASSET_BASE_URL)));
+const gameOverSound = new Audio(URL.createObjectURL(await loadAsset('gameover.mp3', CONFIG.ASSET_BASE_URL)));
 
 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
   themeSelect.value = 'dark';
@@ -193,24 +203,21 @@ let playerName = '';
 
 async function loadOnlineLeaderboard() {
   try {
-    const res = await fetch(SCORE_API);
-    if (res.ok) {
-      const data = await res.json();
-      onlineScores = data.scores || [];
-    }
-  } catch (e) {
+    onlineScores = await fetchLeaderboard(SCORE_API);
+  } catch {
     onlineScores = [];
   }
 }
 
 async function postScoreOnline(scoreData) {
   try {
-    await fetch(SCORE_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(scoreData)
-    });
-  } catch (e) {}
+    await submitScore(SCORE_API, scoreData);
+  } catch (e) {
+    const list = loadUnsentScores();
+    list.push(scoreData);
+    saveUnsentScores(list);
+    throw e;
+  }
 }
 
 function loadLeaderboard() {
@@ -711,6 +718,7 @@ themeSelect.addEventListener('change', () => {
 reset();
 renderLeaderboard();
 loadOnlineLeaderboard();
+flushScores(SCORE_API);
 startButton.addEventListener('click', () => {
   // give the snake an initial direction so it doesn't immediately
   // collide with itself when the game starts
