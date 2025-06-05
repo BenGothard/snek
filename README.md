@@ -21,6 +21,7 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 - Difficulty levels adjust speed and add obstacles.
 - Choose from multiple visual themes.
 - Leaderboards are stored per difficulty and include player names.
+- A "Clear Local Scores" button lets you reset the leaderboard.
 - The theme defaults to dark when your system prefers it.
 - Battle against multiple AI-controlled snakes.
 - AI-controlled snakes start by hunting apples to grow but increasingly try to
@@ -52,6 +53,8 @@ Then open the provided URL in your browser to play the game locally.
 
 The game now remembers your chosen theme and player name in your browser's
 local storage so you don't have to re-enter them next time.
+You can clear the stored leaderboard any time using the **Clear Local Scores**
+button beneath the leaderboard.
 
 ### Online scores
 
