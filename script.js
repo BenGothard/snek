@@ -14,6 +14,7 @@ const rightBtn = document.getElementById('btn-right');
 const pauseTouchBtn = document.getElementById('btn-pause');
 const playerNameInput = document.getElementById('player-name');
 const leaderboardEl = document.getElementById('leaderboard');
+const clearScoresBtn = document.getElementById('clear-scores');
 const gameOverEl = document.getElementById('game-over');
 const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
@@ -746,6 +747,13 @@ themeSelect.addEventListener('change', () => {
 
 reset();
 renderLeaderboard();
+if (clearScoresBtn) {
+  clearScoresBtn.addEventListener('click', () => {
+    localStorage.removeItem('leaderboard');
+    renderLeaderboard();
+    console.log('Local leaderboard cleared');
+  });
+}
 if (ONLINE_ENABLED) {
   loadOnlineLeaderboard();
   flushScores(SCORE_API);
