@@ -20,6 +20,7 @@ const pausedEl = document.getElementById('paused');
 const themeSelect = document.getElementById('theme');
 const terminalEl = document.getElementById('terminal-log');
 const toggleLogBtn = document.getElementById('toggle-log');
+const trailerBtn = document.getElementById('watch-trailer');
 if (terminalEl) {
   ['log', 'warn', 'error'].forEach(level => {
     const orig = console[level].bind(console);
@@ -784,6 +785,16 @@ pauseButton.addEventListener('click', () => {
     requestAnimationFrame(gameLoop);
   }
 });
+
+if (trailerBtn) {
+  trailerBtn.addEventListener('click', () => {
+    window.open(
+      'https://sora.chatgpt.com/g/gen_01jxakwe5debwb775dzck502aa',
+      '_blank',
+      'noopener'
+    );
+  });
+}
 
 function attachTouch(el, dir) {
   const handler = e => {
