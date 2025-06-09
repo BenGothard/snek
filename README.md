@@ -31,6 +31,8 @@ Your highest scores are stored locally and displayed in the leaderboard below th
 
 Enjoy!
 
+Want a quick preview? [Watch the anime trailer here](https://sora.chatgpt.com/g/gen_01jxakwe5debwb775dzck502aa) or use the **Watch Trailer** button on the page.
+
 ## Setup
 
 Make sure Node.js and npm are installed on your system. If you're on
